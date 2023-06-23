@@ -1,0 +1,11 @@
+
+name: nanopore_mod
+channels:
+  - bioconda
+dependencies:
+  - f5c
+
+
+
+
+

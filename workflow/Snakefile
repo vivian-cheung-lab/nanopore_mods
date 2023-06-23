@@ -43,13 +43,13 @@ modified_sample_base = modified_sample_table.index.tolist()
 control_sample_table = sample_table[sample_table.mod_concentration=='none']
 control_sample_table.set_index('short_name', inplace=True)
 
-# this just specifies what we're trying to compute
+# this specifies what things we're trying to compute
 rule all:
 	input:
                 ['bam_no_splicing/' + s + '.bam'
 			for s in sample_base],
-		['aligned_fastq/' + s + '.fastq.gz'
-			for s in sample_base],
+		# ['aligned_fastq/' + s + '.fastq.gz'
+		#   for s in sample_base],
                 ['RDD_3/' + s + '.csv.gz'
 			for s in sample_base],
 #		['stats_from_bam/' + s + '.txt.gz'
