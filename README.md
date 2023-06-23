@@ -14,7 +14,8 @@ The following describes steps needed to reproduce the analysis.
 
 ### Initial basecalling
 
-Bases were initially called using Guppy, on a GPU-equipped cluster.
+Bases were initially called using Guppy, on a GPU-equipped cluster,
+using the script in `workflow/scrips/run_guppy_batch.sh`.
 
 ### Snakemake
 
