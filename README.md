@@ -3,10 +3,7 @@
 Code associated with the paper
 
 *Nanopore-based direct sequencing of RNA transcripts with ten different modified nucleotides reveals gaps in existing technology.*
-Joshua Burdick
-Annelise Comai
-Alan Bruzel
-Vivian Cheung
+Joshua Burdick, Annelise Comai, Alan Bruzel, Vivian Cheung
 
 ## Steps to reproduce analysis
 
