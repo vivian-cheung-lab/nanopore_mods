@@ -1,0 +1,32 @@
+params {
+    conffile            = "final_summary_01.txt"
+    fast5               = "$baseDir/IVT/fast5_files/**/"
+    fastq               = ""
+
+    reference           = "$baseDir/IVT/AANCR_IVT.fa.gz"
+    annotation          = ""
+    ref_type            = "transcriptome"
+
+    pars_tools          = "drna_tool_unsplice_guppy6_opt.tsv"
+    output              = "$baseDir/output"
+    qualityqc           = 5
+    granularity         = 1
+
+    basecalling         = "guppy"
+    GPU                 = "ON"
+    demultiplexing      = "NO"
+    demulti_fast5       = "NO" 
+
+    filtering           = "nanoq"
+
+    mapping             = "minimap2"
+    counting            = "nanocount"
+    discovery           = "NO"
+
+    cram_conv           = "NO"
+    subsampling_cram    = 50
+
+    saveSpace           = "NO"
+
+    email               = ""
+}

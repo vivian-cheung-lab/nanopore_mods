@@ -1,0 +1,23 @@
+params {
+    // ??? it's not clear which files are needed
+    input_path         = "$baseDir/../mop_preprocess/output/"
+    comparison         = "$baseDir/comparison_IVT.tsv"
+
+    reference          = "$baseDir/IVT/AANCR_IVT_230411.fa.gz"
+    
+    output             = "$baseDir/output_mod"
+
+    pars_tools         = "$baseDir/tools_opt.tsv"
+    
+    // flows 
+    epinano       = "YES"
+    nanocompore   = "NO"
+    tombo_lsc     = "YES"
+    tombo_msc     = "YES"
+
+    // epinano plots
+    epinano_plots = "YES"
+
+    email              = ""
+}
+
