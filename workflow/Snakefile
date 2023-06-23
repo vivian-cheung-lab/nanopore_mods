@@ -34,9 +34,6 @@ region = 'chr19:45406985-45408892'
 # region1 = 'chr19:45407500-45407530'
 
 sample_table = pandas.read_csv('IVT_samples.csv')
-# for practice
-sample_table = sample_table[:3]
-
 
 sample_base = sample_table.FASTQ_file_base_name.tolist()
 sample_base = sample_base
