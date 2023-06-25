@@ -10,13 +10,12 @@ import pandas
 import numpy as np
 import pysam
 
-import seq.nanopore.align
+# import seq.nanopore.align
 import seq.nanopore.polish
-import seq.nanopore.squiggle.matrix
+# import seq.nanopore.squiggle.matrix
 import seq.nanopore.squiggle.stat.event_stats
 
-DATA_DIR = '/net/schuylkill/data/'
-GIT = '/home/jtburd/work/'
+DATA_DIR = '../data/mop_preprocess/output/'
 
 fast5_dir = DATA_DIR + '/Fastq/nanopore/IVT_AANCR/'
 
@@ -45,12 +44,12 @@ rule all:
 		# this is only reads which passed Guppy's quality filter
 		['bam_1/' + s + '.bam'
 			for s in sample_base],
-                ['RDD_3/' + s + '.csv.gz'
-			for s in sample_base],
-                ['events/' + s + '.mergedEvent.tsv.gz'
-			for s in sample_base],
-                ['event_stats/' + region + '/' + s + '.csv.gz'
-			for s in sample_base]]
+#                ['RDD_3/' + s + '.csv.gz'
+#			for s in sample_base],
+#                ['events/' + s + '.mergedEvent.tsv.gz'
+#			for s in sample_base],
+#                ['event_stats/' + region + '/' + s + '.csv.gz'
+#			for s in sample_base]]
 # now using MOP2 for sample stats
 #		['stats_from_bam/' + s + '.txt.gz'
 #			for s in sample_base],
@@ -95,15 +94,6 @@ rule minimap2:
 		# XXX avoid using --write-index for now
 		'minimap2 -t 32 -a -L -x map-ont {minimap2_index} fastq/{wildcards.sample_name}.fastq.gz | samtools sort - -o bam_no_splicing/{wildcards.sample_name}.bam; samtools index bam_no_splicing/{wildcards.sample_name}.bam'
 
-# Gets read statistics (using pomoxis package).
-rule stats_from_bam:
-	input: 
-		'bam_no_splicing/{sample_name}.bam'
-	output:
-		'stats_from_bam/{sample_name}.txt.gz'
-	shell:
-		'stats_from_bam {input} | gzip -c > {output}'
-
 # Gets statistics about reads.
 rule sample_stats_1:
 	input:
@@ -138,8 +128,21 @@ rule sample_stats:
 		# write them out
 		stats.to_csv(output[0], index=False)
 
+
+# Writes out the reads which passed Guppy's quality control.
+rule bam_pass:
+	input:
+		input_bam=DATA_DIR+'alignment/{sample_name}_s.bam',
+		qc=DATA_DIR+'QC_files/{sample_name}_final_summary.stats'
+	output:
+		output_bam='bam_1/{sample_name}.bam'
+	run:
+		print('getting passing reads')
+		print(input.input_bam)
+		print(output.output_bam)
+		pdb.set_trace()
+
 # Writes out reads, with sequence replaced with the reference sequence.
-# ??? may need to tweak the .fastq.gz files as well...
 rule bam_matching_ref:
 	input:
 		'bam_no_splicing/{sample_name}.bam'
