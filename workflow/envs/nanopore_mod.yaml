@@ -3,9 +3,14 @@ name: nanopore_mod
 channels:
   - bioconda
 dependencies:
-  - f5c
+  - python>=3.9
+  - numpy
+  - pandas
+  - pybedtools
+  - pysam
 
-
+# - ont-fast5-api
+# - matplotlib
 
 
 
