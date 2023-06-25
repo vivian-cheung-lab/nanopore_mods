@@ -133,14 +133,22 @@ rule sample_stats:
 rule bam_pass:
 	input:
 		input_bam=DATA_DIR+'alignment/{sample_name}_s.bam',
-		qc=DATA_DIR+'QC_files/{sample_name}_final_summary.stats'
+		qc_file=DATA_DIR+'QC_files/{sample_name}_final_summary.stats'
 	output:
 		output_bam='bam_1/{sample_name}.bam'
 	run:
-		print('getting passing reads')
-		print(input.input_bam)
-		print(output.output_bam)
-		pdb.set_trace()
+		os.makedirs(os.path.dirname(output.output_bam), exist_ok=True)
+		# get passing read IDs
+		qc = pandas.read_table(input.qc_file)
+		qc = qc[ qc.passes_filtering ]
+		passing_read_ids = set(qc[qc['passes_filtering']].read_id)
+		# copy just those reads
+		with pysam.AlignmentFile(input.input_bam) as bam_in:
+			with pysam.AlignmentFile(output.output_bam, 'wb', template=bam_in) as bam_out:
+				for r in bam_in.fetch():
+					if r.query_name in passing_read_ids:
+						bam_out.write(r)
+		pysam.index(output.output_bam)
 
 # Writes out reads, with sequence replaced with the reference sequence.
 rule bam_matching_ref:
