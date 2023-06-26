@@ -2,15 +2,13 @@
 name: nanopore_mod
 channels:
   - bioconda
+  - conda-forge
 dependencies:
-  - python>=3.9
-  - numpy
-  - pandas
-  - pybedtools
-  - pysam
-
-# - ont-fast5-api
-# - matplotlib
-
-
-
+  - python=3.9.7
+  - snakemake=7.28.3
+  - numpy=1.25.0
+  - matplotlib=3.7.1
+  - pandas=2.0.2
+  - pybedtools=0.9.0
+  - pysam=0.21.0
+  - f5c=1.2
