@@ -17,16 +17,19 @@ import seq.nanopore.squiggle.stat.event_stats
 
 DATA_DIR = '../data/mop_preprocess/output/'
 
-fast5_dir = DATA_DIR + '/Fastq/nanopore/IVT_AANCR/'
+# fast5_dir = DATA_DIR + '/Fastq/nanopore/IVT_AANCR/'
 
 # these are just chr19, with the sequence of AANCR
-AANCR_fasta = '/home/jtburd/work/seq/nanopore/RNA/polish/f5c/IVT/RDD/chr19_AANCR_clone_only_230411.fa'
-minimap2_index = 'index/chr19_AANCR_clone_only_230411.mmi'
+# AANCR_fasta = '/home/jtburd/work/seq/nanopore/RNA/polish/f5c/IVT/RDD/chr19_AANCR_clone_only_230411.fa'
+AANCR_fasta = '../data/AANCR_IVT.fa'
+# minimap2_index = 'index/chr19_AANCR_clone_only_230411.mmi'
 
 # coordinates of AANCR
-region = 'chr19:45406985-45408892'
+# region = 'chr19:45406985-45408892'
 # smaller region, for practice
 # region1 = 'chr19:45407500-45407530'
+
+regions_file = '../data/regions.bed'
 
 sample_table = pandas.read_csv('IVT_samples.csv')
 
@@ -44,10 +47,10 @@ rule all:
 		# this is only reads which passed Guppy's quality filter
 		['bam_1/' + s + '.bam'
 			for s in sample_base],
-#                ['RDD_3/' + s + '.csv.gz'
-#			for s in sample_base],
-#                ['events/' + s + '.mergedEvent.tsv.gz'
-#			for s in sample_base],
+                ['RDD_3/' + s + '.csv.gz'
+			for s in sample_base],
+                ['events/' + s + '.mergedEvent.tsv.gz'
+			for s in sample_base],
 #                ['event_stats/' + region + '/' + s + '.csv.gz'
 #			for s in sample_base]]
 # now using MOP2 for sample stats
@@ -73,26 +76,26 @@ rule fastq_gz:
 		# 'cat {input}/**/guppy_output/pass/*.fastq.gz > fastq/{wildcards.sample_name}.fastq.gz'
 
 # Constructs a minimap2 index of AANCR.
-rule minimap2_index:
-	input:
-		# chr19 sequence, with just the modified version of AANCR
-		# (masked with N's elsewhere)
-		AANCR_fasta
-	output:
-		minimap2_index
-	shell:
-		'minimap2 -d {output} {input}'
+#rule minimap2_index:
+#	input:
+#		# chr19 sequence, with just the modified version of AANCR
+#		# (masked with N's elsewhere)
+#		AANCR_fasta
+#	output:
+#		minimap2_index
+#	shell:
+#		'minimap2 -d {output} {input}'
 
 # Aligns reads using minimap2.
-rule minimap2:
-	input: 
-		'fastq/{sample_name}.fastq.gz',
-		minimap2_index
-	output:
-		'bam_no_splicing/{sample_name}.bam'
-	shell:
-		# XXX avoid using --write-index for now
-		'minimap2 -t 32 -a -L -x map-ont {minimap2_index} fastq/{wildcards.sample_name}.fastq.gz | samtools sort - -o bam_no_splicing/{wildcards.sample_name}.bam; samtools index bam_no_splicing/{wildcards.sample_name}.bam'
+# rule minimap2:
+#	input: 
+#		'fastq/{sample_name}.fastq.gz',
+#		minimap2_index
+#	output:
+#		'bam_no_splicing/{sample_name}.bam'
+#	shell:
+#		# XXX avoid using --write-index for now
+#		'minimap2 -t 32 -a -L -x map-ont {minimap2_index} fastq/{wildcards.sample_name}.fastq.gz | samtools sort - -o bam_no_splicing/{wildcards.sample_name}.bam; samtools index bam_no_splicing/{wildcards.sample_name}.bam'
 
 # Gets statistics about reads.
 rule sample_stats_1:
@@ -153,7 +156,7 @@ rule bam_pass:
 # Writes out reads, with sequence replaced with the reference sequence.
 rule bam_matching_ref:
 	input:
-		'bam_no_splicing/{sample_name}.bam'
+		'bam_1/{sample_name}.bam'
 	output:
 		'bam_matching_ref/{sample_name}.bam'
 	run:
@@ -167,18 +170,15 @@ rule bam_matching_ref:
 # somewhat bad form, but a bit tricky to avoid.)
 rule polish:
 	input:
-		fastq='fastq/{sample_name}.fastq.gz',
-		bam='bam_matching_ref/{sample_name}.bam'
+		fastq = DATA_DIR + 'fastq_files/{sample_name}.fq.gz',
+		fast5_dir = DATA_DIR + 'fast5_files/{sample_name}/',
+		bam = 'bam_matching_ref/{sample_name}.bam'
 	output:
 		events_file='events/{sample_name}.mergedEvent.tsv.gz'
 	run:
-		fast5_files_dirs = (glob.glob(fast5_dir + '/' + wildcards.sample_name + '/*/fast5/')
-			+ glob.glob(fast5_dir + '/' + wildcards.sample_name + '/*/*/fast5/'))
-		if len(fast5_files_dirs) == 1:
-			fast5_files_dir = fast5_files_dirs[0]
 		# pdb.set_trace()
 		polisher = seq.nanopore.polish.Polisher(
-			fast5_files_dir, input.fastq, input.bam,
+			input.fast5_dir, input.fastq, input.bam,
 			# we use the actual filename for the Snakemake
 			# rule (so that Snakemake can track whether the
 			# file was created), but the Polisher expects
@@ -195,11 +195,11 @@ rule polish:
 # Writes out per-base RDD counts.
 rule RDD:
 	input:
-		'bam_no_splicing/{sample_name}.bam'
+		'bam_1/{sample_name}.bam'
 	output:
 		'RDD_3/{sample_name}.csv.gz'
 	shell:
-		'scripts/RDD_one_file.py {input} {output}'
+		'scripts/base_count.py {input} {output} {AANCR_fasta} {regions_file}'
 
 # Writes out a matrix of samples for each sample.
 rule squiggle_matrix:
