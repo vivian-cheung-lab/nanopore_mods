@@ -5,23 +5,27 @@ import gzip
 import pdb
 import pickle
 import subprocess
+import sys
 
 import pandas
 import numpy as np
 import pysam
+
+# add local modules to this
+sys.path.append('py/')
 
 # import seq.nanopore.align
 import seq.nanopore.polish
 # import seq.nanopore.squiggle.matrix
 import seq.nanopore.squiggle.stat.event_stats
 
-DATA_DIR = '../data/mop_preprocess/output/'
+DATA_DIR = '../data/AANCR_IVT_Gm_1/mop_preprocess/output/'
 
 # fast5_dir = DATA_DIR + '/Fastq/nanopore/IVT_AANCR/'
 
 # these are just chr19, with the sequence of AANCR
 # AANCR_fasta = '/home/jtburd/work/seq/nanopore/RNA/polish/f5c/IVT/RDD/chr19_AANCR_clone_only_230411.fa'
-AANCR_fasta = '../data/AANCR_IVT.fa'
+AANCR_fasta = '../data/AANCR_IVT_Gm_1/AANCR_IVT.fa'
 # minimap2_index = 'index/chr19_AANCR_clone_only_230411.mmi'
 
 # coordinates of AANCR
@@ -29,7 +33,7 @@ AANCR_fasta = '../data/AANCR_IVT.fa'
 # smaller region, for practice
 # region1 = 'chr19:45407500-45407530'
 
-regions_file = '../data/regions.bed'
+regions_file = '../data/AANCR_IVT_Gm_1/regions.bed'
 
 sample_table = pandas.read_csv('IVT_samples.csv')
 
