@@ -84,7 +84,7 @@ class ReadEventData:
         # we fetch sites with genomic position shifted by 3nt,
         # so that the event centers are in the region
         events1 = list(self.events_tabix.fetch(region1['chrom'],
-            region1['start']-3, region1['end']-3))
+            max(region1['start']-3, 0), region1['end']-3))
         # convert list of rows (each of which is tab-separated)
         # to one long string
         events1 = '\n'.join(events1) + '\n'

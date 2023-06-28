@@ -16,6 +16,7 @@ sys.path.append('py/')
 
 # import seq.nanopore.align
 import seq.nanopore.polish
+import seq.nanopore.squiggle.read_event
 # import seq.nanopore.squiggle.matrix
 import seq.nanopore.squiggle.stat.event_stats
 
@@ -28,12 +29,10 @@ DATA_DIR = '../data/AANCR_IVT_Gm_1/mop_preprocess/output/'
 AANCR_fasta = '../data/AANCR_IVT_Gm_1/AANCR_IVT.fa'
 # minimap2_index = 'index/chr19_AANCR_clone_only_230411.mmi'
 
-# coordinates of AANCR
-# region = 'chr19:45406985-45408892'
-# smaller region, for practice
-# region1 = 'chr19:45407500-45407530'
-
 regions_file = '../data/AANCR_IVT_Gm_1/regions.bed'
+
+# coordinates of AANCR
+region = 'AANCR_IVT:1-1908'
 
 sample_table = pandas.read_csv('IVT_samples.csv')
 
@@ -55,14 +54,15 @@ rule all:
 			for s in sample_base],
                 ['events/' + s + '.mergedEvent.tsv.gz'
 			for s in sample_base],
-#                ['event_stats/' + region + '/' + s + '.csv.gz'
-#			for s in sample_base]]
+                ['event_stats/' + region + '/' + s + '.csv.gz'
+			for s in sample_base]
 # now using MOP2 for sample stats
 #		['stats_from_bam/' + s + '.txt.gz'
 #			for s in sample_base],
 #		'summary/sample_stats.csv'
 
 # Writes out a combined .fastq.gz file.
+# Deprecated (MOP2 is now doing this).
 rule fastq_gz:
 	input: 
 		'/net/schuylkill/data/Fastq/nanopore/IVT_AANCR/{sample_name}/'
@@ -250,14 +250,14 @@ rule labelled_squiggle:
 
 # Summary stats about events.
 rule event_stats:
-        input:
-                fastq='fastq/{sample_name}.fastq.gz',
-                events_file='events/{sample_name}.mergedEvent.tsv.gz'
-        output:
-                stats_output=('event_stats/{region}/{sample_name}.csv.gz')
-        run:
-                read_data = seq.nanopore.squiggle.read_event.ReadEventData(
-                        input.fastq, input.events_file)
+	input:
+		fastq = DATA_DIR + 'fastq_files/{sample_name}.fq.gz',
+		events_file='events/{sample_name}.mergedEvent.tsv.gz'
+	output:
+		stats_output=('event_stats/{region}/{sample_name}.csv.gz')
+	run:
+		read_data = seq.nanopore.squiggle.read_event.ReadEventData(
+			input.fastq, input.events_file)
 		events = read_data.get_events_at_region(region,
 			include_dwell_time=True)
 		event_stats = seq.nanopore.squiggle.stat.event_stats.event_stats_by_position(
@@ -267,7 +267,7 @@ rule event_stats:
 # T-tests between event statistics.
 rule event_t_test:
         input:
-                fastq='fastq/{sample_name}.fastq.gz',
+                fastq = DATA_DIR + 'fastq_files/{sample_name}.fq.gz',
                 events_file='events/{sample_name}.mergedEvent.tsv.gz'
         output:
                 t_test_output=('event_t_test/{region}/{sample_name}.csv.gz')
@@ -294,7 +294,7 @@ rule event_t_test:
 # Summary stats about events.
 rule event_summary_stats:
 	input:  
-		fastq='fastq/{sample_name}.fastq.gz',
+                fastq = DATA_DIR + 'fastq_files/{sample_name}.fq.gz',
 		events_file='events/{sample_name}.mergedEvent.tsv.gz'
 	output: 
 		stats_output=('event_summary_stats/{sample_name}.csv.gz')
