@@ -39,7 +39,7 @@ class Polisher:
     else:
       self.eventOutputBase = re.sub('\.bam', '', self.bamFile)
     # number of threads to use, for multithreaded steps
-    self.numThreads = 64
+    self.numThreads = 4
 
   def indexReads(self):
     """Indexes reads using f5c.
@@ -108,7 +108,7 @@ class Polisher:
       # using faster (but less effective) compression
       '--compress-level', '3',
       # ??? not clear how many threads to use
-      '--threads', '4'],
+      '--threads', str(self.numThreads)],
       stdin=p4.stdout,
       stdout=open(event_output_filename, 'wb'))
     # wait until these finish
