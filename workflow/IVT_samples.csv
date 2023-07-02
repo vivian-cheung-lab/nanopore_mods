@@ -1,4 +1,4 @@
-sample_name,short_name,concentration
+FASTQ_file_base_name,short_name,mod_concentration
 IVT_biotin-C_none,biotin-C,none
 IVT_biotin-C_1_to_100,biotin-C,1 to 100
 IVT_biotin-C_1_to_10,biotin-C,1 to 10
