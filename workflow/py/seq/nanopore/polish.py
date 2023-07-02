@@ -90,7 +90,7 @@ class Polisher:
       '--iop', str(self.numThreads)],
       stdout=subprocess.PIPE)
     # remove header line
-    p2 = subprocess.Popen(['tail', '+2'],
+    p2 = subprocess.Popen(['tail', '--lines=+2'],
       stdin=p1.stdout, stdout=subprocess.PIPE)
     # sort events (this seems to already be partly sorted)
     p3 = subprocess.Popen(['sort',
