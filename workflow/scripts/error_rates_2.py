@@ -21,7 +21,7 @@ import seaborn as sns
 
 
 # location of data
-data_base = '../'
+data_base = './'
 
 # sample info
 sample_table = pandas.read_csv(data_base + '/IVT_samples.csv')
@@ -326,7 +326,7 @@ indel_stats_sugar_100pct.head()
 # In[19]:
 
 # for now, omitting the "100% sugar" tables
-with pandas.ExcelWriter('error_rates_2.xlsx') as xls:
+with pandas.ExcelWriter('scripts/error_rates_2.xlsx') as xls:
     mismatch_stats_canonical.to_excel(xls, sheet_name='Mismatch, canonical')
     canonical_U_to_X.to_excel(xls, sheet_name='U>X, canonical')
     indel_stats_canonical.to_excel(xls, sheet_name='Indels, canonical')
