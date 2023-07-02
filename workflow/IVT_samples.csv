@@ -1,2 +1,55 @@
-FASTQ_file_base_name,short_name,mod_concentration
+sample_name,short_name,concentration
+IVT_biotin-C_none,biotin-C,none
+IVT_biotin-C_1_to_100,biotin-C,1 to 100
+IVT_biotin-C_1_to_10,biotin-C,1 to 10
+IVT_biotin-C_1_to_5,biotin-C,1 to 5
+IVT_biotin-C_1_to_2,biotin-C,1 to 2
+IVT_hm5C_none,hm5C,none
+IVT_hm5C_1_to_100,hm5C,1 to 100
+IVT_hm5C_1_to_10,hm5C,1 to 10
+IVT_hm5C_1_to_5,hm5C,1 to 5
+IVT_hm5C_1_to_2,hm5C,1 to 2
+IVT_Cm_none,Cm,none
+IVT_Cm_1_to_100,Cm,1 to 100
+IVT_Cm_1_to_10,Cm,1 to 10
+IVT_Cm_1_to_5,Cm,1 to 5
+IVT_Cm_1_to_2,Cm,1 to 2
+IVT_m5C_none,m5C,none
+IVT_m5C_1_to_100,m5C,1 to 100
+IVT_m5C_1_to_10,m5C,1 to 10
+IVT_m5C_1_to_5,m5C,1 to 5
+IVT_m5C_1_to_2,m5C,1 to 2
+IVT_m6A_none,m6A,none
+IVT_m6A_1_to_100,m6A,1 to 100
+IVT_m6A_1_to_10,m6A,1 to 10
+IVT_m6A_1_to_5,m6A,1 to 5
+IVT_m6A_1_to_2,m6A,1 to 2
+IVT_m1A_none,m1A,none
+IVT_m1A_1_to_100,m1A,1 to 100
+IVT_m1A_1_to_10,m1A,1 to 10
+IVT_m1A_1_to_5,m1A,1 to 5
+IVT_m1A_1_to_2,m1A,1 to 2
+IVT_Am_none,Am,none
+IVT_Am_1_to_100,Am,1 to 100
+IVT_Am_1_to_10,Am,1 to 10
+IVT_Am_1_to_5,Am,1 to 5
+IVT_Am_1_to_2,Am,1 to 2
+IVT_pseudoU_none,Y,none
+IVT_pseudoU_1_to_100,Y,1 to 100
+IVT_pseudoU_1_to_10,Y,1 to 10
+IVT_pseudoU_1_to_5,Y,1 to 5
+IVT_pseudoU_1_to_2,Y,1 to 2
+IVT_Um_none,Um,none
+IVT_Um_1_to_100,Um,1 to 100
+IVT_Um_1_to_10,Um,1 to 10
+IVT_Um_1_to_5,Um,1 to 5
+IVT_Um_1_to_2,Um,1 to 2
+IVT_Gm_none,Gm,none
+IVT_Gm_1_to_100,Gm,1 to 100
+IVT_Gm_1_to_10,Gm,1 to 10
+IVT_Gm_1_to_5,Gm,1 to 5
+IVT_Gm_1_to_2,Gm,1 to 2
+IVT_Am_100%,Am,100%
+IVT_Cm_100%,Cm,100%
 IVT_Gm_100%,Gm,100%
+IVT_Um_100%,Um,100%

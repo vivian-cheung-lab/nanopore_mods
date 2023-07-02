@@ -1,5 +1,5 @@
 
-name: nanopore_mod
+name: nanopore_mods
 channels:
   - conda-forge
   - bioconda

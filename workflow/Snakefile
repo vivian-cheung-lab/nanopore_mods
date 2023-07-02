@@ -20,16 +20,16 @@ import seq.nanopore.squiggle.read_event
 # import seq.nanopore.squiggle.matrix
 import seq.nanopore.squiggle.stat.event_stats
 
-DATA_DIR = '../data/AANCR_IVT_Gm_1/mop_preprocess/output/'
+DATA_DIR = '../data/AANCR_IVT_1/mop_preprocess/output/'
 
 # fast5_dir = DATA_DIR + '/Fastq/nanopore/IVT_AANCR/'
 
 # these are just chr19, with the sequence of AANCR
 # AANCR_fasta = '/home/jtburd/work/seq/nanopore/RNA/polish/f5c/IVT/RDD/chr19_AANCR_clone_only_230411.fa'
-AANCR_fasta = '../data/AANCR_IVT_Gm_1/AANCR_IVT.fa'
+AANCR_fasta = '../data/AANCR_IVT_1/AANCR_IVT.fa'
 # minimap2_index = 'index/chr19_AANCR_clone_only_230411.mmi'
 
-regions_file = '../data/AANCR_IVT_Gm_1/regions.bed'
+regions_file = '../data/AANCR_IVT_1/regions.bed'
 
 # coordinates of AANCR
 region = 'AANCR_IVT:1-1908'
