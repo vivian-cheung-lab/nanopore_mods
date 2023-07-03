@@ -165,6 +165,8 @@ def plot_dist_comparison(events_by_base, stat_name, plot_width, output_name, mod
         'Dwell time': 'dwell_time',
         'Dwell time (ms)': 'dwell_time_ms',
         'Log10(Dwell time)': 'log10_dwell_time'}[stat_name]
+    modifications = list(set(events_by_base['Modification']))
+    modifications.sort()
     fig = plt.figure(figsize=(plot_width, 4.8))
     # style, for setting lines to black
     s = {'color': 'black'}
@@ -176,6 +178,12 @@ def plot_dist_comparison(events_by_base, stat_name, plot_width, output_name, mod
         'hue': 'Sample',
         'sym': '',            # omit plotting outliers
         'hue_order': ['Unmodified', 'Modified'],
+
+        # workaround for issue with seaborn using np.float
+        # (which numpy has deprecated)
+        'orient': 'v',
+        'order': modifications,
+
         # color bars
         'palette': {'Unmodified': 'grey', 'Modified': mod_color},
         # set lines in these to black
@@ -196,8 +204,6 @@ def plot_dist_comparison(events_by_base, stat_name, plot_width, output_name, mod
     plot.seaborn.utils.adjust_box_widths(fig, 0.75)
     # this is based on example code at
     # https://levelup.gitconnected.com/statistics-on-seaborn-plots-with-statannotations-2bfce0394c00
-    modifications = list(set(events_by_base['Modification']))
-    modifications.sort()
     pairs = tuple([[(m, 'Unmodified'), (m, 'Modified')] for m in modifications])
     # by default, using human-readable name for this
     plt.ylabel(stat_name)
@@ -276,7 +282,7 @@ if __name__ == '__main__':
     if False:
         plot_comparison('base modifications', '1 to 2', 'AANCR_IVT:1-1908', 7.9,
             [
-            ('m6A', 'A'),
+            ('m1A', 'A')
             # ('biotin-C', 'C'),
             # ('Y', 'U'),
             ],
