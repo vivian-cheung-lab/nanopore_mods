@@ -19,6 +19,9 @@ import pandas
 import pysam
 import seaborn as sns
 
+# add local modules to this
+sys.path.append('py/')
+
 import plot.seaborn.utils
 from statannotations.Annotator import Annotator
 
@@ -271,27 +274,28 @@ if __name__ == '__main__':
 
     # possibly plot only a few, for testing
     if False:
-        plot_comparison('base modifications', '1:2', 'chr19:45406985-45408892', 7.9,
+        plot_comparison('base modifications', '1 to 2', 'AANCR_IVT:1-1908', 7.9,
             [
-            ('biotin-C', 'C'),
-            ('Y', 'U'),
+            ('m6A', 'A'),
+            # ('biotin-C', 'C'),
+            # ('Y', 'U'),
             ],
             mod_color='green')
         sys.exit(0)
     if True:
-      plot_comparison('base modifications', '1 to 2', 'chr19:45406985-45408892', 7.9,
-        [
-        ('m1A', 'A'),
-        ('m6A', 'A'),
-        ('biotin-C', 'C'),
-        ('hm5C', 'C'),
-        ('m5C', 'C'),
-        ('Y', 'U'),
-        ],
-        mod_color='green')
-    plot_comparison('sugar modifications', '100%', 'chr19:45406985-45407485', 6.4,
-        [('Am', 'A'), ('Cm', 'C'), ('Gm', 'G'), ('Um', 'U')],
-        mod_color='red')
+        plot_comparison('base modifications', '1 to 2', 'AANCR_IVT:1-1908', 7.9,
+            [
+            ('m1A', 'A'),
+            ('m6A', 'A'),
+            ('biotin-C', 'C'),
+            ('hm5C', 'C'),
+            ('m5C', 'C'),
+            ('Y', 'U'),
+            ],
+            mod_color='green')
+        plot_comparison('sugar modifications', '100%', 'AANCR_IVT:1-500', 6.4,
+            [('Am', 'A'), ('Cm', 'C'), ('Gm', 'G'), ('Um', 'U')],
+            mod_color='red')
     if False:
       plot_comparison('sugar modifications', '1:2', 'chr19:45406985-45407485', 6.4,
         [('Am', 'A'), ('Cm', 'C'), ('Gm', 'G'), ('Um', 'U')],

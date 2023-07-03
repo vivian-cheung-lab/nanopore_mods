@@ -56,11 +56,8 @@ rule all:
 			for s in sample_base],
                 ['event_stats/' + region + '/' + s + '.csv.gz'
 			for s in sample_base],
-		'scripts/error_rates_2.xlsx'
-# now using MOP2 for sample stats
-#		['stats_from_bam/' + s + '.txt.gz'
-#			for s in sample_base],
-#		'summary/sample_stats.csv'
+		'scripts/error_rates_2.xlsx',
+		'output/Dwell time for sugar modifications, 100%.pdf'
 
 # Writes out a combined .fastq.gz file.
 # Deprecated (MOP2 is now doing this).
@@ -210,11 +207,21 @@ rule RDD:
 rule error_stats:
 	input:
                 ['RDD_3/' + s + '.csv.gz'
-			for s in sample_base],
+			for s in sample_base]
 	output:
 		'scripts/error_rates_2.xlsx'
 	shell:
 		'scripts/error_rates_2.py'
+
+
+rule dwell_time_plots:
+	input:
+                ['events/' + s + '.mergedEvent.tsv.gz'
+			for s in sample_base]
+	output:
+		'output/Dwell time for sugar modifications, 100%.pdf'
+	shell:
+		'scripts/event_dist_at_site.py'
 
 # Writes out a matrix of samples for each sample.
 rule squiggle_matrix:
