@@ -35,15 +35,17 @@ git clone https://github.com/vivian-cheung-lab/nanopore_mods.git
 4. Create the Conda environment, and activate it.
 
 ```
-% conda env create -f [nanopore_mods_1.yaml](nanopore_mods_1.yaml)
-% conda activate nanopore_mods_1
+cd nanopore_mods
+conda env create -f nanopore_mods_1.yaml
+conda activate nanopore_mods_1
 ```
 
 5. Download and unpack the data. (This is 37 GB of data, and will take at least six minutes.
 Half an hour may be more realistic, depending on your network connection.)
 
+This should be run in the `nanopore_mods` directory (like the previous command).
+
 ```
-cd nanopore_mods
 curl https://storage.googleapis.com/nanopore_mods_test_data/IVT_AANCR_data_20230708.tar.gz | tar xvfz -
 ```
 
