@@ -35,7 +35,7 @@ git clone https://github.com/vivian-cheung-lab/nanopore_mods.git
 4. Create the Conda environment, and activate it.
 
 ```
-% conda env create -f nanopore_mods_1.yaml
+% conda env create -f [nanopore_mods_1.yaml](nanopore_mods_1.yaml)
 % conda activate nanopore_mods_1
 ```
 

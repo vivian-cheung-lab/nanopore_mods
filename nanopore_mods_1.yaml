@@ -5,6 +5,7 @@ channels:
   - conda-forge
   - bioconda
 dependencies:
+  - git    # for downloading the repository
   - python=3.9.7
   - snakemake=7.28.3
   - numpy=1.25.0
