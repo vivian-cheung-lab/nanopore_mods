@@ -12,7 +12,7 @@ This describes how to run the nanopore modification analysis, starting from Gupp
 base-called output. Commands to run at the shell prompt are shown in this font:
 
 ```
-ls *directory*
+ls
 ```
 
 1. You will need an x86 Linux system with
@@ -39,7 +39,8 @@ git clone https://github.com/vivian-cheung-lab/nanopore_mods.git
 % conda activate nanopore_mods_1
 ```
 
-5. Download and unpack the data. (This will take at least five minutes, and r
+5. Download and unpack the data. (This is 37 GB of data, and will take at least six minutes.
+Half an hour may be more realistic, depending on your network connection.)
 
 ```
 cd nanopore_mods
