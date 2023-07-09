@@ -3,6 +3,7 @@
 This is code associated with the paper
 
 *Nanopore-based direct sequencing of RNA transcripts with ten different modified nucleotides reveals gaps in existing technology.*
+
 Joshua Burdick, Annelise Comai, Alan Bruzel, Vivian Cheung
 
 ## Running nanopore analysis
@@ -20,29 +21,29 @@ ls *directory*
 - at least 8 processors are recommended
 - a recent version of Conda installed
 
-2. Clone this repository, into a directory with enough disk space.
+2. Install a version of conda. This may already be installed on your
+system. If not, Miniconda is a good alternative. To install it,
+go to the [Miniconda installer page](https://docs.conda.io/en/latest/miniconda.html),
+and follow the instructions there.
+
+3. Clone this repository, into a directory with enough disk space.
 
 ```
 git clone https://github.com/vivian-cheung-lab/nanopore_mods.git
 ```
-
-
-2. Download and unpack the data
-
-```
-% tar xvf FIXME
-```
-
-3. Install a version of conda. We have tested using Miniconda;
-download links for that are at:
-
-https://docs.conda.io/en/latest/miniconda.html
 
 4. Create the Conda environment, and activate it.
 
 ```
 % conda env create -f nanopore_mods_1.yaml
 % conda activate nanopore_mods_1
+```
+
+5. Download and unpack the data. (This will take at least five minutes, and r
+
+```
+cd nanopore_mods
+curl https://storage.googleapis.com/nanopore_mods_test_data/IVT_AANCR_data_20230708.tar.gz | tar xvfz -
 ```
 
 5. Run the 
