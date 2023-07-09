@@ -1,0 +1,359 @@
+# Attempt at using Snakemake
+
+# FIXME
+# - use configuration files, as in this?
+#   https://snakemake.readthedocs.io/en/stable/snakefiles/configuration.html
+#   configfile: "path/to/config.yaml"
+# - break this into smaller files?
+# - many event-related things are omitted
+# - "pomoxis" requires samtools 1.9, which doesn't include the
+#   "--write-index" option
+
+import glob
+import gzip
+import pdb
+import pickle
+import subprocess
+import sys
+
+import pandas
+import numpy as np
+import pysam
+
+git_root = '../../../../../../../../'
+
+# XXX add to Python path
+sys.path.append(git_root + '/py/')
+
+import seq.nanopore.align
+import seq.nanopore.polish
+import seq.nanopore.squiggle.read_event
+import seq.nanopore.squiggle.stat.event_stats
+
+# fast5_dir = '/net/schuylkill/data/Fastq/nanopore/IVT_AANCR/'
+fast5_dir = git_root + '../IVT_AANCR/'
+
+# these are just chr19, with the sequence of AANCR
+AANCR_fasta = git_root + '../chr19_AANCR_clone_only_230411.fa'
+minimap2_index = 'chr19_AANCR_clone_only_230411.mmi'
+
+# coordinates of AANCR
+region = 'chr19:45406985-45408892'
+# smaller region, for practice
+region1 = 'chr19:45407500-45407530'
+
+sample_table = pandas.read_csv('IVT_samples.csv')
+# sample_table = sample_table[:3]     # for testing
+
+sample_base = sample_table.FASTQ_file_base_name.tolist()
+sample_base = sample_base
+modified_sample_table = sample_table[ sample_table.mod_concentration != 'none' ]
+modified_sample_table.set_index('FASTQ_file_base_name', inplace=True)
+modified_sample_base = modified_sample_table.index.tolist()
+control_sample_table = sample_table[sample_table.mod_concentration=='none']
+control_sample_table.set_index('short_name', inplace=True)
+
+# this just specifies what we're trying to compute
+rule all:
+	input:
+                ['bam_no_splicing/' + s + '.bam'
+			for s in sample_base],
+#		['aligned_fastq/' + s + '.fastq.gz'
+#			for s in sample_base],
+                ['RDD_3/' + s + '.csv.gz'
+			for s in sample_base],
+#		['stats_from_bam/' + s + '.txt.gz'
+#			for s in sample_base],
+                ['events/' + s + '.mergedEvent.tsv.gz'
+			for s in sample_base],
+                ['event_stats/' + region + '/' + s + '.csv.gz'
+			for s in sample_base],
+		'scripts/nanopore_error_rates.xlsx',
+		# ... lastly, other scripts
+		'other.txt'
+ 
+# Writes out a combined .fastq.gz file.
+rule fastq_gz:
+	input: 
+#		'/net/schuylkill/data/Fastq/nanopore/IVT_AANCR/{sample_name}/'
+		fast5_dir + '{sample_name}/'
+	output:
+		'fastq/{sample_name}.fastq.gz'
+	run:
+		# get location of guppy_output/ directory
+		guppy_output_dirs = (glob.glob(f'{input}/*/guppy_output/')
+			+ glob.glob(f'{input}/*/*/guppy_output/'))
+		if len(guppy_output_dirs) == 1:
+			guppy_output_dir = guppy_output_dirs[0]
+		subprocess.run(f'cat {guppy_output_dir}/pass/*.fastq.gz > fastq/{wildcards.sample_name}.fastq.gz',
+			shell=True)
+		# XXX now including files from any subdirectory called "guppy_output"
+		# 'cat {input}/**/guppy_output/pass/*.fastq.gz > fastq/{wildcards.sample_name}.fastq.gz'
+
+# Constructs a minimap2 index of AANCR.
+rule minimap2_index:
+	input:
+		# chr19 sequence, with just the modified version of AANCR
+		# (masked with N's elsewhere)
+		AANCR_fasta
+	output:
+		minimap2_index
+	shell:
+		'minimap2 -d {output} {input}'
+
+# Aligns reads using minimap2.
+rule minimap2:
+	input: 
+		'fastq/{sample_name}.fastq.gz',
+		minimap2_index
+	output:
+		'bam_no_splicing/{sample_name}.bam'
+	shell:
+		# XXX avoid using --write-index for now
+		'minimap2 -t 32 -a -L -x map-ont {minimap2_index} fastq/{wildcards.sample_name}.fastq.gz | samtools sort - -o bam_no_splicing/{wildcards.sample_name}.bam; samtools index bam_no_splicing/{wildcards.sample_name}.bam'
+
+# Gets read statistics.
+rule stats_from_bam:
+	input: 
+		'bam_no_splicing/{sample_name}.bam'
+	output:
+		'stats_from_bam/{sample_name}.txt.gz'
+	shell:
+		'stats_from_bam {input} | gzip -c > {output}'
+
+# high-sensitivity version of that
+rule minimap2_sensitive:
+	input: 
+		'fastq/{sample_name}.fastq.gz'
+	output:
+		'bam_no_splicing_sensitive/{sample_name}.bam'
+	shell:
+		'minimap2 -t 32 -k 5 -a -L -x map-ont {AANCR_fasta} fastq/{wildcards.sample_name}.fastq.gz | samtools sort - --write-index -o bam_no_splicing_sensitive/{wildcards.sample_name}.bam'
+
+# write out .fastq.gz file of only reads which aligned
+# (for getting base quality using MOP2)
+rule aligned_fastq:
+	input:
+		bam='bam_no_splicing/{sample_name}.bam',
+		fastq='fastq/{sample_name}.fastq.gz'
+	output:
+		fastq='aligned_fastq/{sample_name}.fastq.gz'
+	run:
+		seq.nanopore.align.write_aligned_fastq(
+			input.bam, input.fastq, output.fastq)
+
+# Writes out reads, with sequence replaced with the reference sequence.
+# ??? may need to tweak the .fastq.gz files as well...
+rule bam_matching_ref:
+	input:
+		'bam_no_splicing/{sample_name}.bam'
+	output:
+		'bam_matching_ref/{sample_name}.bam'
+	run:
+		seq.nanopore.polish.write_bam_matching_reference(
+			AANCR_fasta,
+			input[0],
+			output[0])
+
+# "Polishes" reads, and writes events, using f5c.
+# (This writes various indexing files in fastq/, which seems like
+# somewhat bad form, but a bit tricky to avoid.)
+rule polish:
+	input:
+		fastq='fastq/{sample_name}.fastq.gz',
+		bam='bam_matching_ref/{sample_name}.bam'
+	output:
+		events_file='events/{sample_name}.mergedEvent.tsv.gz'
+	run:
+		print('polishing')
+		# deal with fast5 files sometimes being in different dirs
+		fast5_files_dirs = (glob.glob(fast5_dir + '/' + wildcards.sample_name + '/*/fast5/')
+			+ glob.glob(fast5_dir + '/' + wildcards.sample_name + '/*/*/fast5/'))
+		if len(fast5_files_dirs) == 1:
+			fast5_files_dir = fast5_files_dirs[0]
+		polisher = seq.nanopore.polish.Polisher(
+			fast5_files_dir, input.fastq, input.bam,
+			# we use the actual filename for the Snakemake
+			# rule (so that Snakemake can track whether the
+			# file was created), but the Polisher expects
+			# the "base name"
+			eventOutputBase = re.sub(
+				'.mergedEvent.tsv.gz$',
+				'',
+				output.events_file))
+		print('indexing...')
+		polisher.indexReads()
+		print('writing events...')
+		polisher.write_merged_events(AANCR_fasta)
+
+# Writes out per-base RDD counts.
+rule RDD:
+	input:
+		'bam_no_splicing/{sample_name}.bam'
+	output:
+		'RDD_3/{sample_name}.csv.gz'
+	shell:
+		'../RDD/one_file/RDD_one_file.py {input} {output}'
+
+# Writes out a sample of events.
+# ??? should the filename extension be '.txt.gz'?
+rule event_sample:
+	input:
+		events_file='events/{sample_name}.mergedEvent.tsv.gz'
+	output:
+		event_sample='event_sample/{sample_name}.tsv.gz'
+	run:
+		seq.nanopore.squiggle.read_event.summarize_event_file(
+			input.events_file, output.event_sample,
+			reads_per_sample=100)
+
+# Writes out a matrix of samples for each sample.
+rule squiggle_matrix:
+	input:
+		fastq='fastq/{sample_name}.fastq.gz',
+		events_file='events/{sample_name}.mergedEvent.tsv.gz',
+		bam_file='bam_no_splicing/{sample_name}.bam'
+	output:
+		squiggle_matrix_file=(
+			'squiggle_matrix/{region}/{sample_name}.npz')
+	run:
+		read_data = seq.nanopore.squiggle.read_event.ReadEventData(
+			input.fastq, input.events_file)
+    		traces = read_data.get_raw_traces_at_region(region,
+			max_reads=1000)
+		# get called bases as a matrix
+		bam = pysam.AlignmentFile(input.bam_file)
+		called_bases = seq.nanopore.squiggle.matrix.get_bases_as_matrix(
+			bam, traces, region)
+		# get matrix of squiggle data
+		s = seq.nanopore.squiggle.matrix.get_samples(
+			region, '+', traces)
+		np.savez_compressed(output.squiggle_matrix_file,
+			base = s['base'],
+			time = s['time'],
+			dwell = s['dwell'],
+			current = s['current'],
+			called_bases = called_bases)
+
+# Writes out labelled squiggles in compressed Numpy .npz format.
+rule labelled_squiggle:
+	input:
+		fastq='fastq/{sample_name}.fastq.gz',
+		events_file='events/{sample_name}.mergedEvent.tsv.gz'
+	output:
+		labelled_squiggle_file=(
+			'labelled_squiggle/{region1}/{sample_name}.npz')
+	run:
+		read_data = seq.nanopore.squiggle.read_event.ReadEventData(
+			input.fastq, input.events_file)
+		seq.nanopore.squiggle.matrix.write_labelled_squiggles_as_numpy(
+			read_data, output.labelled_squiggle_file, region1,
+			max_reads=1000)
+
+# Summary stats about events.
+rule event_stats:
+        input:
+                fastq='fastq/{sample_name}.fastq.gz',
+                events_file='events/{sample_name}.mergedEvent.tsv.gz'
+        output:
+                stats_output=('event_stats/{region}/{sample_name}.csv.gz')
+        run:
+                read_data = seq.nanopore.squiggle.read_event.ReadEventData(
+                        input.fastq, input.events_file)
+		events = read_data.get_events_at_region(region,
+			include_dwell_time=True)
+		event_stats = seq.nanopore.squiggle.stat.event_stats.event_stats_by_position(
+			events)
+		event_stats.to_csv(output.stats_output)
+
+# T-tests between event statistics.
+rule event_t_test:
+        input:
+                fastq='fastq/{sample_name}.fastq.gz',
+                events_file='events/{sample_name}.mergedEvent.tsv.gz'
+        output:
+                t_test_output=('event_t_test/{region}/{sample_name}.csv.gz')
+	run:
+		# get name of corresponding control sample
+		modified_short_name = modified_sample_table.loc[
+			wildcards.sample_name].short_name
+		control_sample_name = control_sample_table.loc[
+			modified_short_name].FASTQ_file_base_name
+		# get modified events
+                mod_events = seq.nanopore.squiggle.read_event.ReadEventData(
+                	input.fastq, input.events_file
+		).get_events_at_region(region)
+		# get control events
+                control_events = seq.nanopore.squiggle.read_event.ReadEventData(
+                	f'fastq/{control_sample_name}.fastq.gz',
+                	f'events/{control_sample_name}.mergedEvent.tsv.gz'
+		).get_events_at_region(region)
+		# do t-test, and write out results
+		event_t_test = seq.nanopore.squiggle.stat.event_stats.t_test(
+			mod_events, control_events)
+		event_t_test.to_csv(output.t_test_output)
+
+# Summary stats about events.
+rule event_summary_stats:
+	input:  
+		fastq='fastq/{sample_name}.fastq.gz',
+		events_file='events/{sample_name}.mergedEvent.tsv.gz'
+	output: 
+		stats_output=('event_summary_stats/{sample_name}.csv.gz')
+	run:
+		# ??? don't know why this needs to be read in again
+		sample_table = pandas.read_csv('IVT_samples.csv')
+		# get short name of modification
+		sample_table = sample_table.set_index(['FASTQ_file_base_name'])
+		short_name = sample_table.loc[
+			wildcards.sample_name].short_name
+		# get "base which was modified"
+		short_name_to_modified_base = {
+			'Am': 'A', 'Cm': 'C', 'Gm': 'G', 'Um': 'U',
+			'm1A': 'A', 'm6A': 'A', 'biotin-C': 'C',
+			'hm5C': 'C', 'm5C': 'C', 'Y': 'U',
+			'Cm + 5mM MnCl': 'C'}
+		modified_base = short_name_to_modified_base[short_name]
+		# XXX hack to deal with 'U' being written as 'T' in the output file
+		if modified_base == 'U':
+			modified_base = 'T'
+		# get data
+		if short_name in ['Am', 'Cm', 'Gm', 'Um']:
+			region = 'chr19:45406985-45407485'
+		else:   
+			region = 'chr19:45406985-45408892'
+		# XXX for practice
+		# region = 'chr19:45406985-45407015'
+		# just using the entire region, for all samples (even though some of
+		# them aren't present in the entire region)
+		region = 'chr19:45406985-45408892'
+		read_data = seq.nanopore.squiggle.read_event.ReadEventData(
+			input.fastq, input.events_file)
+		events = read_data.get_events_at_region(region, include_dwell_time=True)
+		events = events[ events.central_base==modified_base ]
+		event_stats = seq.nanopore.squiggle.stat.event_stats.event_stats_summary(
+			events)
+		event_stats.to_csv(output.stats_output)
+
+# various other analyses
+rule error_rates:
+	input:
+		['RDD_3/' + s + '.csv.gz' for s in sample_base]
+	output:
+		'scripts/nanopore_error_rates.xlsx'
+	shell:
+		'scripts/nanopore_error_rates.py'
+
+# this is an inelegant way to run the other analyses
+rule other:
+	input:
+		['RDD_3/' + s + '.csv.gz'
+			for s in sample_base],
+		['event_stats/chr19:45406985-45408892/' + s + '.csv.gz'
+			for s in sample_base]
+	output:
+		'other.txt'
+	shell:
+		# FIXME find a better way to write this?
+		'(cd ../../../../../plot/IGV; ./PCA_base_filter.py; ./plot_mod.py); (cd ../squiggle/plot//event_stats_3/; ./event_dist_at_site.py; ./dwell_time_stats.py); touch other.txt'
+

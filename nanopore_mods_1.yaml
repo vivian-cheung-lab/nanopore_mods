@@ -1,0 +1,25 @@
+# This is a conda environment for the Snakemake workflow.
+
+name: nanopore_mods_1
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.9.7
+  - snakemake=7.28.3
+  - numpy=1.25.0
+  - scipy=1.11.0
+  - matplotlib=3.7.1
+  - seaborn-0.12.2
+  - pandas=2.0.2
+  - pybedtools=0.9.0
+  - pysam=0.21.0
+  - samtools
+  - tabix=1.11
+  - f5c=0.8
+  - ont-fast5-api
+  - ont_vbz_hdf_plugin
+  - minimap2=2.17
+  # this this is to avoid some issues with HDF5 ROS3 support
+  - h5py<=3.1
+  - statannotations
