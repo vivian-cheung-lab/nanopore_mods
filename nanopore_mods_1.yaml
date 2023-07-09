@@ -1,6 +1,6 @@
 # This is a conda environment for the Snakemake workflow.
 
-name: nanopore_mods_1_lax1
+name: nanopore_mods_1
 channels:
   - conda-forge
   - bioconda
