@@ -5,9 +5,6 @@
 #   https://snakemake.readthedocs.io/en/stable/snakefiles/configuration.html
 #   configfile: "path/to/config.yaml"
 # - break this into smaller files?
-# - many event-related things are omitted
-# - "pomoxis" requires samtools 1.9, which doesn't include the
-#   "--write-index" option
 
 import glob
 import gzip
@@ -26,6 +23,7 @@ git_root = '../../../../../../../../'
 sys.path.append(git_root + '/py/')
 
 import seq.nanopore.align
+import seq.nanopore.event.event_outlier
 import seq.nanopore.polish
 import seq.nanopore.squiggle.read_event
 import seq.nanopore.squiggle.stat.event_stats
@@ -68,6 +66,9 @@ rule all:
 			for s in sample_base],
                 ['event_stats/' + region + '/' + s + '.csv.gz'
 			for s in sample_base],
+		['event_matrix/' + region + '/' + s + '.npz'
+			for s in sample_base],
+
 		'scripts/nanopore_error_rates.xlsx',
 		# ... lastly, other scripts
 		'other.txt'
@@ -207,33 +208,28 @@ rule event_sample:
 			input.events_file, output.event_sample,
 			reads_per_sample=100)
 
-# Writes out a matrix of samples for each sample.
-rule squiggle_matrix:
+# Writes out a matrix of event info for each sample.
+rule event_matrix:
 	input:
 		fastq='fastq/{sample_name}.fastq.gz',
 		events_file='events/{sample_name}.mergedEvent.tsv.gz',
 		bam_file='bam_no_splicing/{sample_name}.bam'
 	output:
-		squiggle_matrix_file=(
-			'squiggle_matrix/{region}/{sample_name}.npz')
+		event_matrix_file=(
+			'event_matrix/{region}/{sample_name}.npz')
 	run:
 		read_data = seq.nanopore.squiggle.read_event.ReadEventData(
 			input.fastq, input.events_file)
     		traces = read_data.get_raw_traces_at_region(region,
-			max_reads=1000)
-		# get called bases as a matrix
-		bam = pysam.AlignmentFile(input.bam_file)
-		called_bases = seq.nanopore.squiggle.matrix.get_bases_as_matrix(
-			bam, traces, region)
-		# get matrix of squiggle data
-		s = seq.nanopore.squiggle.matrix.get_samples(
-			region, '+', traces)
-		np.savez_compressed(output.squiggle_matrix_file,
-			base = s['base'],
-			time = s['time'],
-			dwell = s['dwell'],
-			current = s['current'],
-			called_bases = called_bases)
+			max_reads=10)
+		# get event stats
+		eo = seq.nanopore.event.event_outlier.EventOutlier(
+			wildcards.region)
+		event_info = eo.get_event_stats_as_matrix(read_data)
+		# write them out
+		np.savez_compressed(output.event_matrix_file,
+			read_names = event_info['read_names'],
+			event_stats = event_info['event_stats'])
 
 # Writes out labelled squiggles in compressed Numpy .npz format.
 rule labelled_squiggle:
