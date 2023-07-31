@@ -33,14 +33,15 @@ mod_names = list(set([s.split(' ')[0] for s in set(pca.Label)]))
 mod_names.sort()
 
 
-def plot_PCA_for_mod(mod_name, hue, components):
+def plot_PCA_for_mod(mod_name, hue):
     """Plots PCA of all the concentrations of one modification.
 
     mod_name: the name of the modification
     hue: the hue to use for plotting this modification
-    components: the components to plot (as a 2-tuple of column names)
     Side effects: plots PCA for that modification
     """
+    # using the first two components seems to work reasonably well
+    components = ['PC1', 'PC2']
     os.makedirs(output_dir, exist_ok=True)
     x = pca.loc[:,['Label',components[0],components[1]]]
     x = x[ x.Label.str.startswith(mod_name) ]
@@ -51,11 +52,11 @@ def plot_PCA_for_mod(mod_name, hue, components):
         x1 = x[x.concentration==concentration]
         plt.scatter(x1[components[0]], x1[components[1]],
                 label=concentration, alpha=0.4)
-
-    plt.savefig(f'{output_dir}/{mod_name}_{components[0]}_{components[1]}.png')
+    plt.xlabel(components[0])
+    plt.ylabel(components[1])
+    plt.savefig(f'{output_dir}/{mod_name}.png')
 
 for mod in mod_names:
     print(mod)
-    plot_PCA_for_mod(mod, 2/3, ['PC1', 'PC2'])
-    plot_PCA_for_mod(mod, 2/3, ['PC2', 'PC3'])
+    plot_PCA_for_mod(mod, 2/3)
 
