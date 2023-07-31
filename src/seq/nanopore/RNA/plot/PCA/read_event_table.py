@@ -31,18 +31,24 @@ def read_event_matrices():
 
 
 def get_count_of_nonmissing_ranges(x):
+    """Gets counts of non-missing ranges.
+
+    FIXME not currently working
+    """
     # we just use whether current is present
     # (as time is present at same sites)
     current_present = ~ np.isnan(x[:,0,:])
-    # get cumulative sum, forward
-
-
-    # ... and reversed
-
-
-    # np.outer(
-    pdb.set_trace()
-
+    # get mean of cumulative sum, up to each b ase
+    sum_of_bases_to_left = np.cumsum(current_present, axis=1)
+    # compute means of columns of this
+    mean_left = sum_of_bases_to_left.mean(axis=0)
+    # compute the means over the spans
+    n = mean_left.shape[0]
+    span_mean = np.zeros((n,n))
+    for i in range(n-1):
+        for j in range(i+1, n):
+            span_mean[i,j] = (mean_left[j] - mean_left[i]) / (j-i)
+    return span_mean
 
 def get_means_for_missing_values():
     """Gets means at each position to fill in missing values.
@@ -52,7 +58,7 @@ def get_means_for_missing_values():
     """
     unmodified_samples = [matrices[s]
             for s in matrices.keys()
-            where s.endswith(' none')]
+            if s.endswith(' none')]
     pdb.set_trace()
 
 
