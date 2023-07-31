@@ -75,7 +75,7 @@ def get_means_for_missing_values():
 
 
 matrices = read_event_matrices()
-print('[getting unmodified stats]'
+print('[getting unmodified stats]')
 unmodified_stats = get_means_for_missing_values()
 # column names
 column_names = (
@@ -102,7 +102,7 @@ def format_array(x):
     i = np.isnan(x2)
     x2[i] = m1[i]
     # round the numbers slightly
-    x2 = np.round(x2, 5)
+    x2 = np.round(x2, 6)
     return x2
 
 def format_as_table(sample_name):
