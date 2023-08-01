@@ -32,11 +32,14 @@ def write_PCA(X, output_filename):
 
 # write out with columns standardized (as before)
 write_PCA(standardize(X), 'PCA_columns_standardized.csv')
-# ... and with rows standardized (treating current and time separately)
-n = X.shape[1] // 2
-X1 = np.concatenate([
-    standardize(X[:,:n].T).T,
-    standardize(X[:,n:(2*n)].T).T,
-    ], axis=1)
-write_PCA(X1, 'PCA_rows_standardized.csv')
+
+if False:
+    # ... this would be with rows standardized, treating
+    # current and time separately; doesn't seem to work as well
+    n = X.shape[1] // 2
+    X1 = np.concatenate([
+        standardize(X[:,:n].T).T,
+        standardize(X[:,n:(2*n)].T).T,
+        ], axis=1)
+    write_PCA(X1, 'PCA_rows_standardized.csv')
 

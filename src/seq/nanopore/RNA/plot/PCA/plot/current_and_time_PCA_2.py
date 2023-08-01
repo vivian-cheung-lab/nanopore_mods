@@ -9,15 +9,13 @@ import pandas
 
 # read in PCA from Prism
 # (this may change to using sklearn)
-pca = pandas.read_table('../PCA of Current and dwell time 1.txt')
+# pca = pandas.read_table('../PCA of Current and dwell time 1.txt')
+# using sklearn
+pca = pandas.read_csv('../PCA_columns_standardized.csv')
 
 # where to write output
 output_dir = 'current_and_time_PCA_2'
 
-
-
-# get bounds (so that all the plots can be on the same scale)
-pca_bounds = pca.loc[:,['PC1','PC2','PC3','PC4']].quantile([0,1])
 # mapping from concentration to "level of modification",
 # for color-coding
 concentration_levels = {
@@ -29,9 +27,13 @@ concentration_levels = {
 #        '100%': 5
         }
 
-mod_names = list(set([s.split(' ')[0] for s in set(pca.Label)]))
-mod_names.sort()
 
+
+# get bounds (so that all the plots can be on the same scale)
+pca_bounds = pca.loc[:,['PC1','PC2','PC3']].quantile([0,1])
+
+mod_names = list(set([s.split(' ')[0] for s in set(pca['sample name'])]))
+mod_names.sort()
 
 def plot_PCA_for_mod(mod_name, hue):
     """Plots PCA of all the concentrations of one modification.
@@ -43,9 +45,9 @@ def plot_PCA_for_mod(mod_name, hue):
     # using the first two components seems to work reasonably well
     components = ['PC1', 'PC2']
     os.makedirs(output_dir, exist_ok=True)
-    x = pca.loc[:,['Label',components[0],components[1]]]
-    x = x[ x.Label.str.startswith(mod_name) ]
-    x['concentration'] = x.Label.str.replace(mod_name + ' ', '')
+    x = pca.loc[:,['sample name',components[0],components[1]]]
+    x = x[ x['sample name'].str.startswith(mod_name) ]
+    x['concentration'] = x['sample name'].str.replace(mod_name + ' ', '')
     # set up plotting
     plt.figure(figsize=(9,6))
     for concentration in concentration_levels.keys():

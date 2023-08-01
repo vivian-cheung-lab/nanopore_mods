@@ -7,7 +7,6 @@ import sys
 import numpy as np
 import pandas
 
-
 snakemake_dir = '../../polish/f5c/IVT/mods/Snakemake'
 matrix_dir = f'{snakemake_dir}/event_matrix/chr19:45406985-45408892/'
 
@@ -17,7 +16,7 @@ sample_table['name_and_concentration'] = (sample_table.short_name
 
 # range of 0-based positions to include (half-open)
 # range_to_include = (10, 110)
-range_to_include = (10, 210)
+range_to_include = (5, 505)
 
 def read_event_matrices():
     """Reads in the events."""
@@ -32,11 +31,10 @@ def read_event_matrices():
     print()
     return matrices
 
-
 def get_count_of_nonmissing_ranges(x):
     """Gets counts of non-missing ranges.
 
-    FIXME not currently working
+    FIXME not currently working; thus just using a hardcoded region
     """
     # we just use whether current is present
     # (as time is present at same sites)
