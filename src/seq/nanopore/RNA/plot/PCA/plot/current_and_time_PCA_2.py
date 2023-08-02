@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 # Plots PCA of reads with various modifications.
+# FIXME not yet working...
+# Also, should probably plot all the modifications.
 
 import os
 import pdb
@@ -51,6 +53,7 @@ pca_bounds = pca.loc[:,['PC1','PC2','PC3']].quantile([0,1])
 
 
 
+
 def std_ellipse(sigma, num_points=1000):
     """Gets points corresponding to a 1-sd ellipse.
 
@@ -80,8 +83,6 @@ def plot_center_and_conf_ellipse(mu, sigma, scale=2.44, color='black', lw=2):
     lw: width of line to use
     Side effects: plots the mean (as a point) and the (scaled) s.d. ellipse
     """
-
-
     plt.scatter(mu, c=color, r=lw)
     plt.plot(mu + scale * std_ellipse(sigma), c=color, lw=lw)
 
@@ -108,7 +109,7 @@ def plot_PCA_for_mod(mod_name):
                 label=sample_name,
                 color=sample_color[sample_name],
                 alpha=0.8)
-        # FIXME plot other ways
+        # FIXME plot just the centers of these
     # label axes
     plt.xlabel(components[0])
     plt.ylabel(components[1])
@@ -117,10 +118,14 @@ def plot_PCA_for_mod(mod_name):
     plt.xlim(xlim[0], xlim[1])
     ylim=pca_bounds[components[1]]
     plt.ylim(ylim[0], ylim[1])
-    # FIXME add legend
+    # FIXME add legend?
     plt.legend()
-
     plt.savefig(f'{output_dir}/{mod_name}.png')
+
+# FIXME add a function to plot all of the modifications?
+
+
+
 
 for mod in mod_names:
     print(mod)
