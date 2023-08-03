@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 # Plots PCA of reads with various modifications.
-# FIXME not yet working...
 # Also, should probably plot all the modifications.
 
 import os
@@ -21,6 +20,12 @@ pca = pandas.read_csv('../PCA_columns_standardized.csv')
 # add some annotations
 pca['mod_name'] = [s.split(' ')[0] for s in pca['sample name']]
 pca['concentration'] = [s.split(' ')[1] for s in pca['sample name']]
+
+# get means for PCA from each method
+PC_mean_prism = pandas.read_csv('../Prism/PC_scores_mean.csv')
+PC_mean_prism.rename(columns={'Label': 'sample name'}, inplace=True)
+PC_mean_scipy = pca.groupby('sample name')[['PC1','PC2','PC3']].mean()
+PC_mean_scipy.reset_index(inplace=True)
 
 # where to write output
 output_dir = 'current_and_time_PCA_2'
@@ -49,7 +54,6 @@ for i in pca[['sample name', 'mod_name', 'concentration']].drop_duplicates().ite
 
 # get bounds (so that all the plots can be on the same scale)
 pca_bounds = pca.loc[:,['PC1','PC2','PC3']].quantile([0,1])
-
 
 
 
@@ -122,12 +126,26 @@ def plot_PCA_for_mod(mod_name):
     plt.legend()
     plt.savefig(f'{output_dir}/{mod_name}.png')
 
-# FIXME add a function to plot all of the modifications?
+def plot_all_sample_mean(PC_means, output_prefix):
+    """Plots mean for all of the samples."""
+    for x_label, y_label in [('PC1','PC2'), ('PC2','PC3')]:
+        plt.figure(figsize=(7,7))
+        plt.scatter(PC_means[x_label], PC_means[y_label],
+                color='black', s=5, alpha=0.7)
+        for i in range(len(PC_means)):
+            plt.text(PC_means.loc[i,x_label],
+                   PC_means.loc[i,y_label],
+                   ' ' + PC_means.loc[i,'sample name'],
+                   color='black', alpha=0.7)
+        plt.xlabel(x_label)
+        plt.ylabel(y_label)
+        plt.savefig(f'{output_prefix}_{x_label}_{y_label}.png')
 
+if False:
+    for mod in mod_names:
+        print(mod)
+        plot_PCA_for_mod(mod)
 
-
-
-for mod in mod_names:
-    print(mod)
-    plot_PCA_for_mod(mod)
+plot_all_sample_mean(PC_mean_prism, 'PCA_prism')
+plot_all_sample_mean(PC_mean_scipy, 'PCA_scipy')
 
