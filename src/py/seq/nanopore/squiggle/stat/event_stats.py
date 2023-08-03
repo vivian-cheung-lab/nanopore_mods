@@ -9,16 +9,17 @@ import numpy as np
 import scipy.stats
 import pandas
 
-def event_stats_by_position(events):
+def event_stats(events, group_by):
     """Computes mean and s.e.m. of event statistics.
 
     events: pandas DataFrames of events from one experiment,
         as returned by get_events_at_region()
+    group_by: the columns to group by
     Returns: a data frame including mean, s.d., and s.e.m. of
         current and dwell time.
     """
     events = events[ events.central_base != 'N' ]
-    events_by_pos = events.groupby(['contig', 'pos1', 'reference_kmer'])
+    events_by_pos = events.groupby(group_by)
     event_summary = pandas.DataFrame({
         'current_mean': np.round(events_by_pos['event_level_mean'].mean(), 4),
         'current_std': np.round(events_by_pos['event_level_mean'].std(), 8),
@@ -29,6 +30,14 @@ def event_stats_by_position(events):
         'count': events_by_pos.size()
     })
     return event_summary
+
+def event_stats_by_position(events):
+    """Gets events by position."""
+    return event_stats(events, ['contig', 'pos1', 'reference_kmer'])
+
+def event_stats_by_kmer(events):
+    """Gets events only by k-mer."""
+    return event_stats(events, ['reference_kmer'])
 
 def get_events(read_events, region):
     """Gets events from several read event data sets.
