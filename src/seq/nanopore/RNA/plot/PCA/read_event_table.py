@@ -7,6 +7,7 @@ import sys
 import numpy as np
 import pandas
 
+
 snakemake_dir = '../../polish/f5c/IVT/mods/Snakemake'
 matrix_dir = f'{snakemake_dir}/event_matrix/chr19:45406985-45408892/'
 
@@ -16,7 +17,10 @@ sample_table['name_and_concentration'] = (sample_table.short_name
 
 # range of 0-based positions to include (half-open)
 # range_to_include = (10, 110)
-range_to_include = (5, 505)
+range_to_include = (5, 1900)
+
+# max. number of reads to include from each sample
+max_reads_to_include = 10000
 
 def read_event_matrices():
     """Reads in the events."""
@@ -89,7 +93,7 @@ def format_array(x):
     x1 = x[:,:,range_to_include[0]:range_to_include[1]]
     # sort by number of "present" numbers, decreasing
     num_present = np.sum(~np.isnan(x1[:,0,:]), axis=1)
-    i = np.argsort(num_present)[-100:]
+    i = np.argsort(num_present)[-max_reads_to_include:]
     # select the rows with the highest numbers
     x1 = x1[i,:,:]
     # reshape to put current first, then time
@@ -120,5 +124,5 @@ event_tables = [format_as_table(s) for s in matrices.keys()]
 
 print('[writing table]')
 event_table = pandas.concat(event_tables)
-event_table.to_csv('read_event_table.csv')
+event_table.to_csv('read_event_table_5000.csv')
 
