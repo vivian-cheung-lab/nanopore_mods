@@ -15,6 +15,8 @@ import sys
 import pybedtools
 import pysam
 
+from seq.nanopore.squiggle.read_event import parse_region_string
+
 class Polisher:
   """Polishes nanopore reads using f5c.
 
@@ -259,6 +261,52 @@ def write_bam_matching_reference(ref_fasta_file, bam_in_file, bam_out_file):
             # pdb.set_trace()
             # this will clear the base qualities, which should be
             # okay in this case 
+            bam_out.write(read1)
+    pysam.index(bam_out_file)
+
+def write_bam_assuming_sequence(ref_fasta_file, region, bam_in_file, bam_out_file):
+    """Writes out reads, with an assumed sequence.
+
+    Here, we assume that the sequence is known (even if the basecaller isn't
+    reading it correctly).
+
+    ref_fasta_file: the FASTA reference sequence
+    region: the region to assume this is
+    bam_in_file: BAM file to read
+    bam_out_file: BAM file to write
+    Side effects: writes bam_out_file
+    """
+    # get the sequence to assume for the read (we assume that the
+    # sequence is the same, for all of the reads)
+    ref_position = parse_region_string(region)
+    ref_sequence = ref_fasta.fetch(
+            ref_position.chrom,
+            ref_position.start,
+            ref_position.end).upper()
+    with \
+        pysam.FastaFile(ref_fasta_file) as ref_fasta, \
+        pysam.AlignmentFile(bam_in_file) as bam_in, \
+        pysam.AlignmentFile(bam_out_file, 'wb', template=bam_in) as bam_out:
+        # loop through reads in the input file
+        for read in bam_in:
+            # skip if reference_name isn't present, as presumably
+            # the read didn't align
+            if not read.reference_name:
+                continue
+            # create a new read, partly based on the original alignment
+            read1 = pysam.AlignedSegment()
+            read1.query_name = read.query_name
+            # FIXME should these enforce that the read matched?
+            read1.flag = read.flag
+            read1.mapping_quality = read.mapping_quality
+            read1.reference_id = ref_position.chrom
+            read1.reference_start = ref_position.start
+            # set the query sequence to the reference sequence
+            # (this will clear the base qualities, which should be okay)
+            read1.query_sequence = ref_sequence
+            # set CIGAR string to "all matching"
+            read1.cigar = [(pysam.CMATCH, len(ref_sequence))]
+            # pdb.set_trace()
             bam_out.write(read1)
     pysam.index(bam_out_file)
 
