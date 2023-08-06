@@ -7,13 +7,14 @@ import sys
 import numpy as np
 import pandas
 
-
 snakemake_dir = '../../polish/f5c/IVT/mods/Snakemake'
 matrix_dir = f'{snakemake_dir}/event_matrix/chr19:45406985-45408892/'
 
 sample_table = pandas.read_csv(f'{snakemake_dir}/IVT_samples.csv')
 sample_table['name_and_concentration'] = (sample_table.short_name
     + ' ' + sample_table.mod_concentration)
+# restrict to just base modifications
+sample_table = sample_table[ ~ sample_table.short_name.str.match('^[A-Z]m$') ]
 
 # range of 0-based positions to include (half-open)
 # range_to_include = (10, 110)
@@ -75,7 +76,6 @@ def get_means_for_missing_values():
     }
     return r
 
-
 matrices = read_event_matrices()
 print('[getting unmodified stats]')
 unmodified_stats = get_means_for_missing_values()
@@ -85,7 +85,6 @@ column_names = (
         + [f'time {i+1}' for i in range(range_to_include[0], range_to_include[1])])
 # unmodified stats for those locations
 unmodified_1 = (unmodified_stats['mean'][:,range_to_include[0]:range_to_include[1]].flatten())
-
 
 def format_array(x):
     """Formats one array of event stats with those numbers."""
@@ -124,5 +123,5 @@ event_tables = [format_as_table(s) for s in matrices.keys()]
 
 print('[writing table]')
 event_table = pandas.concat(event_tables)
-event_table.to_csv('read_event_table_5000.csv')
+event_table.to_csv('read_event_table_bases_5000reads.csv')
 
