@@ -20,15 +20,12 @@ pca = pandas.read_csv('../PCA_columns_standardized.csv')
 # add some annotations
 pca['mod_name'] = [s.split(' ')[0] for s in pca['sample name']]
 pca['concentration'] = [s.split(' ')[1] for s in pca['sample name']]
-
-# get means for PCA from each method
-PC_mean_prism = pandas.read_csv('../Prism/PC_scores_mean.csv')
-PC_mean_prism.rename(columns={'Label': 'sample name'}, inplace=True)
-PC_mean_scipy = pca.groupby('sample name')[['PC1','PC2','PC3']].mean()
-PC_mean_scipy.reset_index(inplace=True)
+# omit sugars
+# FIXME this is essentially a roundabout way of getting the sample names
+pca = pca[ ~ pca.mod_name.str.match('^[A-Z]m$') ]
 
 # where to write output
-output_dir = 'current_and_time_PCA_2'
+output_dir = 'current_and_time_PCA_2_bases_5000reads'
 
 # mapping from concentration to "level of modification",
 # for color-coding
@@ -51,10 +48,6 @@ for i in pca[['sample name', 'mod_name', 'concentration']].drop_duplicates().ite
             hue[i[1]['mod_name']],
             0.75,
             concentration_levels[i[1]['concentration']] / 5))
-
-# get bounds (so that all the plots can be on the same scale)
-pca_bounds = pca.loc[:,['PC1','PC2','PC3']].quantile([0,1])
-
 
 def std_ellipse(sigma, num_points=1000):
     """Gets points corresponding to a 1-sd ellipse.
@@ -92,9 +85,11 @@ def plot_center_and_conf_ellipse(mu, sigma, scale=2.44, color='black', lw=2):
 def plot_PCA_for_mod(pca, output_prefix, mod_name):
     """Plots PCA of all the concentrations of one modification.
 
+    FIXME add all the points?
     pca: DataFrame of PCA scores
     output_prefix: output prefix for this
     mod_name: the name of the modification to plot
+        (or None to include all of the modifications)
     Side effects: plots PCA for that modification
     """
     os.makedirs(os.path.dirname(output_prefix), exist_ok=True)
@@ -104,17 +99,19 @@ def plot_PCA_for_mod(pca, output_prefix, mod_name):
     components = ['PC1', 'PC2']
     # set up plotting
     plt.figure(figsize=(9,6))
-    for concentration in concentration_levels.keys():
-        x1 = pca[(pca.mod_name==mod_name) & (pca.concentration==concentration)]
-        if x1.empty:
-            continue
-        # pdb.set_trace()
-        sample_name = f'{mod_name} {concentration}'
-        plt.scatter(x1[components[0]], x1[components[1]],
-                label=sample_name,
-                color=sample_color[sample_name],
-                alpha=0.8)
-        # FIXME plot just the centers of these
+    # include either this modification (or all of them)
+    for modification in [mod_name] if mod_name else mod_names:
+        for concentration in concentration_levels.keys():
+            print(f'modification = {modification}')
+            x1 = pca[(pca.mod_name==modification) & (pca.concentration==concentration)]
+            if x1.empty:
+                continue
+            sample_name = f'{modification} {concentration}'
+            plt.scatter(x1[components[0]], x1[components[1]],
+                    label=sample_name,
+                    color=sample_color[sample_name],
+                    alpha=0.8)
+            # FIXME plot just the centers of these
     # label axes
     plt.xlabel(components[0])
     plt.ylabel(components[1])
@@ -123,16 +120,18 @@ def plot_PCA_for_mod(pca, output_prefix, mod_name):
     plt.xlim(xlim[0], xlim[1])
     ylim=pca_bounds[components[1]]
     plt.ylim(ylim[0], ylim[1])
-    # FIXME add legend?
+    # FIXME tweak legend if all the modifications are included
     plt.legend()
-    plt.savefig(f'{output_prefix}_{mod_name}.png')
+    mod_label = mod_name if mod_name else 'all'
+    plt.savefig(f'{output_prefix}_{mod_label}.png')
 
 def plot_PCA_all_points(pca, output_prefix):
     # add some annotations
     pca['mod_name'] = [s.split(' ')[0] for s in pca['sample name']]
     pca['concentration'] = [s.split(' ')[1] for s in pca['sample name']]
     print(output_prefix)
-    for mod in mod_names:
+    # plot each of these, and all of them combined
+    for mod in mod_names + [None]:
         print(mod)
         plot_PCA_for_mod(pca, output_prefix, mod)
 
@@ -155,15 +154,15 @@ def plot_all_sample_mean(PC_means, output_prefix):
 # plot_all_sample_mean(PC_mean_prism, 'PCA_prism')
 # plot_all_sample_mean(PC_mean_scipy, 'PCA_scipy')
 
-if False:
+if True:
     for quantile_cutoff in [.01, .05, .1, .25, .5]:
-        PC_scores = pandas.read_csv(f'../PCA_5000_reads/PCA_{quantile_cutoff}_quantile.csv.gz')
+        PC_scores = pandas.read_csv(f'../PCA_bases_5000reads/PCA_{quantile_cutoff}_quantile.csv.gz')
         PC_mean = PC_scores.groupby('sample name')[['PC1','PC2','PC3']].mean()
         PC_mean.reset_index(inplace=True)
-        plot_all_sample_mean(PC_mean, f'PCA_5000_all_samples/PCA_quantile_cutoff_{quantile_cutoff}.png')
+        plot_all_sample_mean(PC_mean, f'{output_dir}/PCA_sample_means/PCA_quantile_cutoff_{quantile_cutoff}.png')
 
 for quantile_cutoff in [.01, .05, .1, .25, .5]:
-    PC_scores = pandas.read_csv(f'../PCA_5000_reads/PCA_{quantile_cutoff}_quantile.csv.gz')
+    PC_scores = pandas.read_csv(f'../PCA_bases_5000reads/PCA_{quantile_cutoff}_quantile.csv.gz')
     plot_PCA_all_points(PC_scores,
             f'{output_dir}/PCA_all_points/PCA_quantile_cutoff_{quantile_cutoff}')
 
