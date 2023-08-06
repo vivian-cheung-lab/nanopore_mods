@@ -56,8 +56,6 @@ for i in pca[['sample name', 'mod_name', 'concentration']].drop_duplicates().ite
 pca_bounds = pca.loc[:,['PC1','PC2','PC3']].quantile([0,1])
 
 
-
-
 def std_ellipse(sigma, num_points=1000):
     """Gets points corresponding to a 1-sd ellipse.
 
@@ -146,6 +144,12 @@ if False:
         print(mod)
         plot_PCA_for_mod(mod)
 
-plot_all_sample_mean(PC_mean_prism, 'PCA_prism')
-plot_all_sample_mean(PC_mean_scipy, 'PCA_scipy')
+# plot_all_sample_mean(PC_mean_prism, 'PCA_prism')
+# plot_all_sample_mean(PC_mean_scipy, 'PCA_scipy')
+
+for quantile_cutoff in [.01, .05, .1, .25, .5]:
+    PC_scores = pandas.read_csv(f'../PCA_5000_reads/PCA_{quantile_cutoff}_quantile.csv.gz')
+    PC_mean = PC_scores.groupby('sample name')[['PC1','PC2','PC3']].mean()
+    PC_mean.reset_index(inplace=True)
+    plot_all_sample_mean(PC_mean, f'PCA_quantile_cutoff_{quantile_cutoff}.png')
 
