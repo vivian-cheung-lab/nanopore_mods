@@ -21,6 +21,7 @@ def write_PCA(X, output_filename):
     # 'randomized' solver (which the default 'auto' setting picks)
     pca = sklearn.decomposition.PCA(n_components=3, svd_solver='arpack')
     Y = pca.fit_transform(X)
+    print('% variance explained = {Y.explained_variance_}')
     Y = pandas.DataFrame(Y, columns = ['PC1', 'PC2', 'PC3'])
     Y = np.round(Y, 5)
     r = pandas.concat([event_table['sample name'], pandas.DataFrame(Y)], axis=1)
