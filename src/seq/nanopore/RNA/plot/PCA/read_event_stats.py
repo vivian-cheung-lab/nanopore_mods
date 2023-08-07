@@ -10,7 +10,7 @@ import scipy.stats
 print('[reading in events]')
 # for practice, using 500 rows of previous table; this should include > 1 sample
 # events = pandas.read_csv('read_event_table.csv', nrows=500)
-events = pandas.read_csv('read_event_table_5000.csv.gz')
+events = pandas.read_csv('read_event_table_bases_5000reads.csv.gz')
 print('[computing stats]')
 event_stats = events.describe()
 print('[writing stats]')
@@ -31,5 +31,5 @@ def column_ANOVA(column_name):
 column_ANOVAs = [column_ANOVA(c) for c in events_by_sample.columns]
 column_ANOVAs = pandas.DataFrame(column_ANOVAs,
         index=events_by_sample.columns)
-column_ANOVAs.to_csv('read_event_stats_ANOVA.csv.gz')
+column_ANOVAs.to_csv('read_event_stats_ANOVA_bases_5000reads.csv.gz')
 

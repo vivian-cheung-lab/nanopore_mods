@@ -37,8 +37,12 @@ concentration_levels = {
         '1:2': 4,
         '100%': 5
         }
-mod_names = list(set(pca['mod_name']))
-mod_names.sort()
+
+# mod_names = list(set(pca['mod_name']))
+# mod_names.sort()
+# hard-coding order of modification names, based on which base is modified
+mod_names = ['m1A', 'm6A', 'hm5C', 'm5C', 'biotin-C', 'Y']
+
 # set hues for the modifications
 hue = dict(zip(mod_names, np.linspace(0, 1, len(mod_names), endpoint=False)))
 # get color scheme for these
@@ -99,6 +103,7 @@ def plot_PCA_for_mod(pca, output_prefix, mod_name):
     components = ['PC1', 'PC2']
     # set up plotting
     plt.figure(figsize=(9,6))
+    artists = dict()
     # include either this modification (or all of them)
     for modification in [mod_name] if mod_name else mod_names:
         for concentration in concentration_levels.keys():
@@ -107,10 +112,10 @@ def plot_PCA_for_mod(pca, output_prefix, mod_name):
             if x1.empty:
                 continue
             sample_name = f'{modification} {concentration}'
-            plt.scatter(x1[components[0]], x1[components[1]],
+            artists[sample_name] = plt.scatter(x1[components[0]], x1[components[1]],
                     label=sample_name,
                     color=sample_color[sample_name],
-                    alpha=0.8)
+                    alpha=0.8 if mod_name else 0.7)
             # FIXME plot just the centers of these
     # label axes
     plt.xlabel(components[0])
@@ -120,8 +125,12 @@ def plot_PCA_for_mod(pca, output_prefix, mod_name):
     plt.xlim(xlim[0], xlim[1])
     ylim=pca_bounds[components[1]]
     plt.ylim(ylim[0], ylim[1])
-    # FIXME tweak legend if all the modifications are included
-    plt.legend()
+    if mod_name:
+        # if only a specific mod is included, show all concentrations
+        plt.legend()
+    # if all the mods are included, only include the 1:2 concentration\
+    else:
+        plt.legend([artists[f'{m} 1:2'] for m in mod_names], mod_names)
     mod_label = mod_name if mod_name else 'all'
     plt.savefig(f'{output_prefix}_{mod_label}.png')
 

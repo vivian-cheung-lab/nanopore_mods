@@ -17,7 +17,8 @@ def standardize(x):
 
 def write_PCA(X, output_filename):
     """Computes and writes out a PCA."""
-    # ??? this is taking a while to run
+    # using the 'arpack' solver seems to be running faster than the
+    # 'randomized' solver (which the default 'auto' setting picks)
     pca = sklearn.decomposition.PCA(n_components=3, svd_solver='arpack')
     Y = pca.fit_transform(X)
     Y = pandas.DataFrame(Y, columns = ['PC1', 'PC2', 'PC3'])
@@ -26,9 +27,9 @@ def write_PCA(X, output_filename):
     r.to_csv(output_filename)
 
 # table with entire region, up to 5,000 reads per sample
-event_table = pandas.read_csv('read_event_table_5000.csv.gz')     # , nrows=20000)
+event_table = pandas.read_csv('read_event_table_bases_5000reads.csv.gz')     # , nrows=20000)
 # read in ANOVA stats, for filtering informative events
-column_ANOVAs = pandas.read_csv('read_event_stats_ANOVA.csv.gz', index_col=0)
+column_ANOVAs = pandas.read_csv('read_event_stats_ANOVA_bases_5000reads.csv.gz', index_col=0)
 column_ANOVAs['measurement'] = [s.split()[0] for s in column_ANOVAs.index]
 column_ANOVAs['base'] = [s.split()[1] for s in column_ANOVAs.index]
 
@@ -40,7 +41,7 @@ def write_PCA_at_cutoff(quantile_cutoff):
     Side effects: writes a CSV file of PC scores
     """
     print(f'[writing PCA with quantile cutoff of {quantile_cutoff}]')
-    output_dir = 'PCA_5000_reads/'
+    output_dir = 'PCA_bases_5000reads/'
     os.makedirs(output_dir, exist_ok=True)
     # find cutoff
     current_cutoff = np.quantile(
@@ -61,14 +62,4 @@ def write_PCA_at_cutoff(quantile_cutoff):
 
 for qc in [.01, .05, .1, .25, .5]:
     write_PCA_at_cutoff(qc)
-
-if False:
-    # 500nt region table
-    # read in table
-    event_table = pandas.read_csv('read_event_table.csv', index_col=0)
-    event_table.reset_index(drop=True, inplace=True)
-    # convert to numpy
-    X = event_table.iloc[:,1:].to_numpy()
-    # write out with columns standardized (as before)
-    write_PCA(standardize(X), 'PCA_columns_standardized.csv')
 
