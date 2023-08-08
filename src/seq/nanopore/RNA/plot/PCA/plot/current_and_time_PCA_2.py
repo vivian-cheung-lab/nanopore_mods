@@ -117,7 +117,7 @@ def plot_PCA_for_mod(pca, output_prefix, mod_name):
             artists[sample_name] = plt.scatter(x1[components[0]], x1[components[1]],
                     label=sample_name,
                     color=sample_color[sample_name],
-                    alpha=0.8 if mod_name else 0.7)
+                    alpha=0.8 if mod_name else 0.65)
             # FIXME plot just the centers of these
     # label axes
     plt.xlabel(components[0])
