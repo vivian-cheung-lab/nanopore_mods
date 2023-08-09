@@ -22,7 +22,8 @@ ANOVA_stats['base_number'] = [int(s[1])
 ANOVA_table = ANOVA_stats.pivot(index='base_number', columns='measurement')
 ANOVA_table = ANOVA_table.iloc[:,2:]
 # note that the base index in the table is 1-based
-ANOVA_table['base'] = [clone_seq[i-1] for i in ANOVA_table.index]
+ANOVA_table['base'] = [clone_seq[i-1].replace('T', 'U')
+        for i in ANOVA_table.index]
 
 def base_composition_at_cutoff(proportion_to_include):
     """Gets base composition of the sites with the top % of F-statistics."""
@@ -32,13 +33,13 @@ def base_composition_at_cutoff(proportion_to_include):
     bases = ANOVA_table[
             above_cutoff(ANOVA_table.statistic.current) |
             above_cutoff(ANOVA_table.statistic.time) ].base
-    bases = bases.str.replace('T', 'U')
     base_composition = bases.to_frame().groupby('base').size().to_frame()
     base_composition['cutoff'] = proportion_to_include
     return base_composition
 
 base_composition = pandas.concat([base_composition_at_cutoff(cutoff)
     for cutoff in [0.01, 0.05, 0.1, 0.25, 0.5]])
+# pdb.set_trace()
 
 base_composition.reset_index(inplace=True)
 base_composition = base_composition.pivot(index=['cutoff'], columns='base')
@@ -46,6 +47,6 @@ base_composition.columns = base_composition.columns.droplevel(0)
 # pdb.set_trace()
 
 with pandas.ExcelWriter('event ANOVA and base.xlsx', engine='xlsxwriter') as writer:
-      ANOVA_table.to_excel(writer, sheet_name='ANOVA and central base')
-      base_composition.to_excel(writer, sheet_name='Base composition', index=False)
+    ANOVA_table.to_excel(writer, sheet_name='ANOVA and central base')
+    base_composition.to_excel(writer, sheet_name='Base composition')
 
