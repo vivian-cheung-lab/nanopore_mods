@@ -22,7 +22,7 @@ ANOVA_stats['base_number'] = [int(s[1])
 ANOVA_table = ANOVA_stats.pivot(index='base_number', columns='measurement')
 ANOVA_table = ANOVA_table.iloc[:,2:]
 # note that the base index in the table is 1-based
-ANOVA_table['base'] = [clone_seq[i-1].replace('T', 'U')
+ANOVA_table['base'] = [clone_seq[(i-3):(i+2)].replace('T', 'U')
         for i in ANOVA_table.index]
 
 def base_composition_at_cutoff(proportion_to_include):
@@ -32,7 +32,7 @@ def base_composition_at_cutoff(proportion_to_include):
         return x >= cutoff
     bases = ANOVA_table[
             above_cutoff(ANOVA_table.statistic.current) |
-            above_cutoff(ANOVA_table.statistic.time) ].base
+            above_cutoff(ANOVA_table.statistic.time) ].base.str[2]
     base_composition = bases.to_frame().groupby('base').size().to_frame()
     base_composition['cutoff'] = proportion_to_include
     return base_composition
