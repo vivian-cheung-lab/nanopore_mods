@@ -140,7 +140,7 @@ def plot_PCA_for_mod(pca, output_prefix, mod_name):
                 [artists[f'{m} 1:2'] for m in mod_names] + [artists['Y none']],
                 mod_names + ['None'])
     mod_label = mod_name if mod_name else 'all'
-    plt.savefig(f'{output_prefix}_{mod_label}.png')
+    plt.savefig(f'{output_prefix}_{mod_label}.png', dpi=300)
 
 def plot_PCA_all_points(pca, output_prefix):
     # add some annotations
@@ -167,7 +167,7 @@ def plot_all_sample_mean(PC_means, output_prefix):
                    color='black', alpha=0.7)
         plt.xlabel(x_label)
         plt.ylabel(y_label)
-        plt.savefig(f'{output_prefix}_{x_label}_{y_label}.png')
+        plt.savefig(f'{output_prefix}_{x_label}_{y_label}.png', dpi=300)
 
 # plot_all_sample_mean(PC_mean_prism, 'PCA_prism')
 # plot_all_sample_mean(PC_mean_scipy, 'PCA_scipy')
