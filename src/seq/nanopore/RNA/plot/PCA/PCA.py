@@ -9,6 +9,8 @@ import pandas
 import sklearn.decomposition
 import sklearn.preprocessing
 
+log = open('PCA_log.txt', 'w')
+
 def standardize(x):
     """Standardizes the columns of a data matrix."""
     scaler = sklearn.preprocessing.StandardScaler()
@@ -21,7 +23,7 @@ def write_PCA(X, output_filename):
     # 'randomized' solver (which the default 'auto' setting picks)
     pca = sklearn.decomposition.PCA(n_components=3, svd_solver='arpack')
     Y = pca.fit_transform(X)
-    print('% variance explained = {Y.explained_variance_}')
+    log.write(f'% variance explained = {pca.explained_variance_ratio_}\n')
     Y = pandas.DataFrame(Y, columns = ['PC1', 'PC2', 'PC3'])
     Y = np.round(Y, 5)
     r = pandas.concat([event_table['sample name'], pandas.DataFrame(Y)], axis=1)
@@ -41,7 +43,7 @@ def write_PCA_at_cutoff(quantile_cutoff):
 
     Side effects: writes a CSV file of PC scores
     """
-    print(f'[writing PCA with quantile cutoff of {quantile_cutoff}]')
+    log.write(f'[writing PCA with quantile cutoff of {quantile_cutoff}]\n')
     output_dir = 'PCA_bases_5000reads/'
     os.makedirs(output_dir, exist_ok=True)
     # find cutoff

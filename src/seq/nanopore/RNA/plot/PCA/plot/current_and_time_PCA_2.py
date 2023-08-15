@@ -138,7 +138,7 @@ def plot_PCA_for_mod(pca, output_prefix, mod_name):
     else:
         plt.legend(
                 [artists[f'{m} 1:2'] for m in mod_names] + [artists['Y none']],
-                mod_names + ['None'])
+                mod_names + ['Canonical'])
     mod_label = mod_name if mod_name else 'all'
     plt.savefig(f'{output_prefix}_{mod_label}.png', dpi=300)
 
