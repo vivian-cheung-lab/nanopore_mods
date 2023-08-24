@@ -30,6 +30,13 @@ import seq.nanopore.squiggle.read_event
 # set default font to Arial
 plt.rcParams['font.family'] = 'Arial'
 
+# ... and make everything boldface
+plt.rcParams["font.weight"] = "bold"
+plt.rcParams["axes.labelweight"] = "bold"
+# ... and lines wider
+plt.rcParams['lines.linewidth'] = 2.0
+plt.rcParams['axes.linewidth'] = 2.0
+
 # where to get data from
 data_base = '../../../Snakemake/'
 # where to write images
@@ -157,7 +164,7 @@ def plot_dist_comparison(events_by_base, stat_name, plot_width, output_name, mod
         'Dwell time': 'dwell_time',
         'Dwell time (ms)': 'dwell_time_ms',
         'Log10(Dwell time)': 'log10_dwell_time'}[stat_name]
-    fig = plt.figure(figsize=(plot_width, 4.8))
+    fig = plt.figure(figsize=(plot_width, 4.), linewidth=2)       # 4.8))
     # style, for setting lines to black
     s = {'color': 'black'}
 
@@ -280,7 +287,7 @@ if __name__ == '__main__':
             ],
             mod_color='green')
         sys.exit(0)
-    if True:
+    if False:
       plot_comparison('base modifications', '1:2', 'chr19:45406985-45408892', 7.9,
         [
         ('m1A', 'A'),
@@ -291,7 +298,7 @@ if __name__ == '__main__':
         ('Y', 'U'),
         ],
         mod_color='green')
-    plot_comparison('sugar modifications', '100%', 'chr19:45406985-45407485', 6.4,
+    plot_comparison('sugar modifications', '100%', 'chr19:45406985-45407485', 5.3333333,   # 6.4,
         [('Am', 'A'), ('Cm', 'C'), ('Gm', 'G'), ('Um', 'U')],
         mod_color='red')
 
