@@ -25,3 +25,5 @@ dependencies:
   - statannotations
   - openpyxl
   - biopython
+  - scikit-learn
+  - xlsxwriter

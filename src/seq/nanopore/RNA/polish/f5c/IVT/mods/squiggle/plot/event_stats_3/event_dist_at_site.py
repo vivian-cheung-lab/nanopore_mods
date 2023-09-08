@@ -218,7 +218,7 @@ def plot_dist_comparison(events_by_base, stat_name, plot_width, output_name, mod
     # add annotations
     annotator = Annotator(bp, pairs, **plot_params)
     annotator.configure(test='t-test_ind', comparisons_correction='bonferroni',
-        text_format='star', show_test_name=False)
+        text_format='star', show_test_name=False, line_width=2)
 #        pvalue_thresholds=custom_p_value_thresholds)
         # avoid printing *'s for non-significant cases?
         # pvalue_thresholds=[[1e-4, "****"], [1e-3, "***"], [1e-2, "**"], [0.05, "*"], [1, ""]])
