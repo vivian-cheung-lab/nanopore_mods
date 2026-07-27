@@ -3,7 +3,7 @@
 
 This is code associated with the paper
 
-Burdick JT, Comai A, Bruzel A, Sun G, Dedon PC, Cheung VG. Nanopore-based direct sequencing of RNA transcripts with 10 different modified nucleotides reveals gaps in existing technology. G3 (Bethesda). 2023 Nov 1;13(11):jkad200. doi: 10.1093/g3journal/jkad200. PMID: (37655917)[https://pubmed.ncbi.nlm.nih.gov/37655917/]; PMCID: PMC10627276.
+Burdick JT, Comai A, Bruzel A, Sun G, Dedon PC, Cheung VG. Nanopore-based direct sequencing of RNA transcripts with 10 different modified nucleotides reveals gaps in existing technology. G3 (Bethesda). 2023 Nov 1;13(11):jkad200. doi: 10.1093/g3journal/jkad200. PMID: [37655917](https://pubmed.ncbi.nlm.nih.gov/37655917/); PMCID: PMC10627276.
 
 ## Running nanopore analysis
 
@@ -44,15 +44,14 @@ Half an hour may be more realistic, depending on your network connection.)
 
 There are two alternative ways to do this.
 
-- One way is to download from the cloud.  This command should be run in the
-`nanopore_mods` directory (like the previous command).
-
+- One way is to download from the cloud.  To do this, run
+the following command from the `nanopore_mods` directory (like the previous command).
 ```
 curl https://storage.googleapis.com/nanopore_mods_test_data/IVT_AANCR_data_20230708.tar.gz | tar xvfz -
 ```
 
 - Another alternative is to download the data from
-the (SRA)[https://www.ncbi.nlm.nih.gov/sra].
+the [SRA](https://www.ncbi.nlm.nih.gov/sra).
 
 To do this, from the `nanopore_mods` directory, run:
 ```
