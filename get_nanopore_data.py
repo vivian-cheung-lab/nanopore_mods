@@ -26,7 +26,7 @@ sample_info = sra_client.sra_metadata("SRP439844", detailed=True)
 sample_info["run_total_bases"] = sample_info["run_total_bases"].astype(int)
 sample_info.to_csv(f"{output_dir}/SRP439844_sample_info.csv")
 # Original sample names.
-original_samples = pandas.read_csv("IVT_samples.csv")
+original_samples = pandas.read_csv("src/seq/nanopore/RNA/polish/f5c/IVT/mods/Snakemake/IVT_samples.csv")
 # Tweak names to match those in the SRA annotation.
 original_samples.short_name.replace({
         "Y": "pseudouridine"
