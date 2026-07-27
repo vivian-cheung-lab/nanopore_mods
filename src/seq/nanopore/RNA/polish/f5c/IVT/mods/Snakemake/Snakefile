@@ -56,17 +56,17 @@ control_sample_table.set_index('short_name', inplace=True)
 # this just specifies what we're trying to compute
 rule all:
 	input:
-                ['bam_no_splicing/' + s + '.bam'
+		['bam_no_splicing/' + s + '.bam'
 			for s in sample_base],
 #		['aligned_fastq/' + s + '.fastq.gz'
 #			for s in sample_base],
-                ['RDD_3/' + s + '.csv.gz'
+		['RDD_3/' + s + '.csv.gz'
 			for s in sample_base],
 #		['stats_from_bam/' + s + '.txt.gz'
 #			for s in sample_base],
-                ['events/' + s + '.mergedEvent.tsv.gz'
+		['events/' + s + '.mergedEvent.tsv.gz'
 			for s in sample_base],
-                ['event_stats/' + region + '/' + s + '.csv.gz'
+		['event_stats/' + region + '/' + s + '.csv.gz'
 			for s in sample_base],
 		'scripts/nanopore_error_rates.xlsx',
 		# ... lastly, other scripts
@@ -219,7 +219,7 @@ rule squiggle_matrix:
 	run:
 		read_data = seq.nanopore.squiggle.read_event.ReadEventData(
 			input.fastq, input.events_file)
-    		traces = read_data.get_raw_traces_at_region(region,
+		traces = read_data.get_raw_traces_at_region(region,
 			max_reads=1000)
 		# get called bases as a matrix
 		bam = pysam.AlignmentFile(input.bam_file)
@@ -252,14 +252,14 @@ rule labelled_squiggle:
 
 # Summary stats about events.
 rule event_stats:
-        input:
-                fastq='fastq/{sample_name}.fastq.gz',
-                events_file='events/{sample_name}.mergedEvent.tsv.gz'
-        output:
-                stats_output=('event_stats/{region}/{sample_name}.csv.gz')
-        run:
-                read_data = seq.nanopore.squiggle.read_event.ReadEventData(
-                        input.fastq, input.events_file)
+	input:
+		fastq='fastq/{sample_name}.fastq.gz',
+		events_file='events/{sample_name}.mergedEvent.tsv.gz'
+	output:
+		stats_output=('event_stats/{region}/{sample_name}.csv.gz')
+	run:
+		read_data = seq.nanopore.squiggle.read_event.ReadEventData(
+			input.fastq, input.events_file)
 		events = read_data.get_events_at_region(region,
 			include_dwell_time=True)
 		event_stats = seq.nanopore.squiggle.stat.event_stats.event_stats_by_position(
@@ -268,11 +268,11 @@ rule event_stats:
 
 # T-tests between event statistics.
 rule event_t_test:
-        input:
-                fastq='fastq/{sample_name}.fastq.gz',
-                events_file='events/{sample_name}.mergedEvent.tsv.gz'
-        output:
-                t_test_output=('event_t_test/{region}/{sample_name}.csv.gz')
+	input:
+		fastq='fastq/{sample_name}.fastq.gz',
+		events_file='events/{sample_name}.mergedEvent.tsv.gz'
+	output:
+		t_test_output=('event_t_test/{region}/{sample_name}.csv.gz')
 	run:
 		# get name of corresponding control sample
 		modified_short_name = modified_sample_table.loc[
@@ -280,13 +280,13 @@ rule event_t_test:
 		control_sample_name = control_sample_table.loc[
 			modified_short_name].FASTQ_file_base_name
 		# get modified events
-                mod_events = seq.nanopore.squiggle.read_event.ReadEventData(
-                	input.fastq, input.events_file
+		mod_events = seq.nanopore.squiggle.read_event.ReadEventData(
+			input.fastq, input.events_file
 		).get_events_at_region(region)
 		# get control events
-                control_events = seq.nanopore.squiggle.read_event.ReadEventData(
-                	f'fastq/{control_sample_name}.fastq.gz',
-                	f'events/{control_sample_name}.mergedEvent.tsv.gz'
+		control_events = seq.nanopore.squiggle.read_event.ReadEventData(
+			f'fastq/{control_sample_name}.fastq.gz',
+			f'events/{control_sample_name}.mergedEvent.tsv.gz'
 		).get_events_at_region(region)
 		# do t-test, and write out results
 		event_t_test = seq.nanopore.squiggle.stat.event_stats.t_test(
