@@ -18,8 +18,7 @@ output_dir = "IVT_AANCR/"
 os.makedirs(output_dir, exist_ok=True)
 
 # write out just the clone sequence on chr19
-subprocess.run(["../chr19_AANCR_clone_only.py"],
-    cwd=output_dir)
+subprocess.run(["./chr19_AANCR_clone_only.py"])
 
 # Get sample info from SRA.
 sra_client = SRAweb()
