@@ -46,7 +46,7 @@ original_samples.columns = [
 sample_info = sample_info.merge(original_samples)
 
 # for testing: start with smallest samples
-sample_info = sample_info.sort_values("run_total_bases").head(2)
+# sample_info = sample_info.sort_values("run_total_bases").head(2)
 
 def format_file_name(s):
     """Makes a filename.
@@ -100,14 +100,15 @@ def write_sample(srr_id, library_name, output_name):
     - Downloads the FAST5 files.
     - Extracts the FASTQ reads from these.
     """
+    formatted_library_name = format_file_name(library_name)
     # XXX The directory names aren't exactly what the Snakemake
     # workflow expects, but should be close enough.
-    output_dir_1 = f"{output_dir}/{output_name}/{library_name}/reads/"
+    output_dir_1 = f"{output_dir}/{output_name}/{formatted_library_name}/reads/"
     os.makedirs(f"{output_dir_1}/fast5/", exist_ok=True)
 
     # Write FAST5 files. The URL for the data is e.g.:
     # https://sra-pub-src-1.s3.amazonaws.com/SRR25667111/hm5C_1_hm5C_to_2_C.tar.gz.1
-    tar_gz_filename = format_file_name(library_name) + ".tar.gz"
+    tar_gz_filename = format_file_name(formatted_library_name) + ".tar.gz"
     fast5_url = f"https://sra-pub-src-1.s3.amazonaws.com/{srr_id}/{tar_gz_filename}.1"
     print(f"fast5_url = {fast5_url}")
     subprocess.run(f"curl {fast5_url} | tar xvfz - --strip-components=1",
