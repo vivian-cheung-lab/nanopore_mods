@@ -55,7 +55,7 @@ the [SRA](https://www.ncbi.nlm.nih.gov/sra).
 
 To do this, from the `nanopore_mods` directory, run:
 ```
-
+./get_nanopore_data.py
 ```
 
 5. Run the 
