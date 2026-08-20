@@ -17,7 +17,7 @@ if True:
     subprocess.run(['wget',
         'https://hgdownload.soe.ucsc.edu/goldenPath/hg19/chromosomes/chr19.fa.gz'])
     subprocess.run(['gunzip', 'chr19.fa.gz'])
-    os.rename('chr19.fa', output_fasta)
+    subprocess.run(['cp', 'chr19.fa', output_fasta])
 
 fa = pyfaidx.Fasta(output_fasta, mutable=True)
 
