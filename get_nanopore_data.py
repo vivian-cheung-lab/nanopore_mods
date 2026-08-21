@@ -115,7 +115,7 @@ def write_sample(srr_id, library_name, output_name):
         shell=True, check=True, cwd=f"{output_dir_1}/fast5/")
 
     # Write FASTQ files.    
-    os.makedirs(f"{output_dir_1}/guppy_output/", exist_ok=True)    
+    os.makedirs(f"{output_dir_1}/guppy_output/pass/", exist_ok=True)
     write_all_fastq(
         f"{output_dir_1}/fast5/",
         f"{output_dir_1}/guppy_output/pass/pass.fastq.gz")
