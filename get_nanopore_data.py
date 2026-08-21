@@ -118,7 +118,7 @@ def write_sample(srr_id, library_name, output_name):
     os.makedirs(f"{output_dir_1}/guppy_output/", exist_ok=True)    
     write_all_fastq(
         f"{output_dir_1}/fast5/",
-        f"{output_dir_1}/guppy_output/pass.fastq.gz")
+        f"{output_dir_1}/guppy_output/pass/pass.fastq.gz")
 
 for _, row in sample_info.iterrows():
     write_sample(
