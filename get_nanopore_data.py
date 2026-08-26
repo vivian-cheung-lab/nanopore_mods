@@ -73,6 +73,11 @@ def write_fastq(fast5_filepath, f):
     min_pass_qscore = 7
     with get_fast5_file(fast5_filepath, mode="r") as f5:
         for read in f5.get_reads():
+            # filter by score
+            mean_qscore = (read.handle['Analyses/Basecall_1D_000/Summary/basecall_1d_template']
+                .attrs['mean_qscore'])
+            if mean_qscore < min_pass_qscore:
+                continue
             # get sequence and quality, as a FASTQ-format string
             fastq = read.handle['Analyses/Basecall_1D_000/BaseCalled_template']['Fastq'][()]
             fastq_str = fastq.tobytes().decode()
